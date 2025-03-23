@@ -1,0 +1,6 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Ensure this is below Tailwind imports */
+@import "react-toastify/dist/ReactToastify.css";

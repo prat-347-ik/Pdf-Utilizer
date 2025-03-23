@@ -1,0 +1,6 @@
+@import "react-toastify/dist/ReactToastify.css"; /* Move this to the top */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
