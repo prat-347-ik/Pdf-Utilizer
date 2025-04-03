@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { mergePDFs } from "../api/apiService"; // Import API function
 import Sidebar from "../components/Sidebar";
+import { motion } from "framer-motion"; // ✅ Import Framer Motion
 
 const MergePDF = () => {
   const [files, setFiles] = useState([]);
   const [mergedFile, setMergedFile] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState({ type: "", text: "" }); // Message state
+  const [message, setMessage] = useState({ type: "", text: "" });
 
   const handleFileChange = (event) => {
     const selectedFiles = Array.from(event.target.files);
@@ -43,13 +44,31 @@ const MergePDF = () => {
     <div className="flex h-screen bg-gradient-to-r from-purple-200 to-pink-200">
       <Sidebar />
 
-      <div className="flex flex-1 justify-center items-center">
-        <div className="p-6 w-full max-w-xl bg-white shadow-lg rounded-lg">
-          <h2 className="text-2xl font-bold mb-4 text-center text-purple-600">Merge PDFs</h2>
+      <motion.div
+        className="flex flex-1 justify-center items-center"
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        <motion.div
+          className="p-6 w-full max-w-xl bg-white shadow-lg rounded-lg"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+          {/* Title */}
+          <motion.h2
+            className="text-2xl font-bold mb-4 text-center text-purple-600"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            Merge PDFs
+          </motion.h2>
 
           {/* Message Box */}
           {message.text && (
-            <div
+            <motion.div
               className={`mb-4 p-3 rounded text-center ${
                 message.type === "success"
                   ? "bg-green-100 text-green-700"
@@ -57,11 +76,15 @@ const MergePDF = () => {
                   ? "bg-red-100 text-red-700"
                   : "bg-yellow-100 text-yellow-700"
               }`}
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4 }}
             >
               {message.text}
-            </div>
+            </motion.div>
           )}
 
+          {/* File Upload */}
           <div className="mb-4">
             <input
               type="file"
@@ -72,38 +95,55 @@ const MergePDF = () => {
             />
           </div>
 
+          {/* Selected Files List */}
           {files.length > 0 && (
-            <div className="mb-4 p-3 bg-purple-100 rounded">
+            <motion.div
+              className="mb-4 p-3 bg-purple-100 rounded"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
+            >
               <h3 className="text-lg font-semibold text-purple-700">Selected Files:</h3>
               <ul className="list-disc pl-5 text-gray-800">
                 {files.map((file, index) => (
-                  <li key={index}>{file.name}</li>
+                  <motion.li key={index} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: index * 0.1 }}>
+                    {file.name}
+                  </motion.li>
                 ))}
               </ul>
-            </div>
+            </motion.div>
           )}
 
-          <button
+          {/* Merge Button */}
+          <motion.button
             className="w-full bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 transition disabled:bg-gray-400"
             onClick={handleMerge}
             disabled={loading}
+            whileHover={{ scale: 1.05 }}
           >
             {loading ? "Merging..." : "Merge PDFs"}
-          </button>
+          </motion.button>
 
+          {/* Download Button */}
           {mergedFile && (
-            <div className="mt-4 p-3 bg-green-100 rounded text-center">
+            <motion.div
+              className="mt-4 p-3 bg-green-100 rounded text-center"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
+            >
               <p className="text-green-700 font-semibold">Merged PDF is ready:</p>
-              <button
+              <motion.button
                 onClick={() => window.open(mergedFile, "_blank")}
                 className="mt-2 bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 transition"
+                whileHover={{ scale: 1.05 }}
               >
                 Download Merged PDF
-              </button>
-            </div>
+              </motion.button>
+            </motion.div>
           )}
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </div>
   );
 };

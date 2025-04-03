@@ -12,7 +12,8 @@ import SpeechToText from "./pages/SpeechToText";
 import Translate from "./pages/Translate";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import Sidebar from "./components/Sidebar";
+import Compress from "./pages/Compress";
+import LandingPage from "./pages/LandingPage";
 import Navbar from "./components/Navbar";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -25,9 +26,12 @@ function App() {
         <div className="flex-1">
         
           <Routes>
-            <Route path="/" element={<Dashboard />} />
+            <Route path="/" element={<LandingPage />} /> {/* Show landing page first */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/merge" element={<Merge />} />
             <Route path="/split" element={<Split />} />
+            <Route path="/compress" element={<Compress />} />
             <Route path="/extract-text" element={<ExtractText />} />
             <Route path="/extract-images" element={<ExtractImages />} />
             <Route path="/sign" element={<Sign />} />

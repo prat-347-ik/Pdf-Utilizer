@@ -2,6 +2,7 @@ import os
 from PyPDF2 import PdfReader, PdfWriter, PdfMerger
 import json
 from PIL import Image
+import io
 
 
 from fpdf import FPDF
@@ -92,21 +93,29 @@ def merge_pdfs(pdf_list, output_path):
 
 
 
-import fitz  # PyMuPDF
-import os
-from PIL import Image
-import io
 
-def compress_pdf(input_pdf_path, output_pdf_path, quality=60, scale_factor=0.5):
+
+def compress_pdf(input_pdf_path, output_pdf_path, compression_level="medium"):
     """
     Compresses a PDF by reducing image size and quality while preserving text-based content.
 
     :param input_pdf_path: Path to the input PDF file.
     :param output_pdf_path: Path to save the compressed PDF.
-    :param quality: JPEG compression quality (default: 60 for better compression).
-    :param scale_factor: Scaling factor for images (default: 0.5 = 50% reduction).
+    :param compression_level: Compression level ('low', 'medium', 'high')
     """
     try:
+        # Define compression settings based on level
+        compression_settings = {
+            "low": {"quality": 30, "scale_factor": 0.3},   # More compression, lower quality
+            "medium": {"quality": 50, "scale_factor": 0.5},  # Balanced compression
+            "high": {"quality": 80, "scale_factor": 0.8},  # Less compression, higher quality
+        }
+
+        # Get the selected compression settings, default to medium
+        settings = compression_settings.get(compression_level, compression_settings["medium"])
+        quality = settings["quality"]
+        scale_factor = settings["scale_factor"]
+
         # Open the PDF
         doc = fitz.open(input_pdf_path)
 
@@ -162,6 +171,8 @@ def compress_pdf(input_pdf_path, output_pdf_path, quality=60, scale_factor=0.5):
 
 
 
+
+
 def extract_text_from_pdf(pdf_path):
     """
     Extracts text from a PDF file.
@@ -174,55 +185,42 @@ def extract_text_from_pdf(pdf_path):
     """
     try:
         doc = fitz.open(pdf_path)
-        extracted_text = ""
-
-        for page in doc:
-            extracted_text += page.get_text("text") + "\n"
-
+        extracted_text = "\n".join([page.get_text("text") for page in doc])
         doc.close()
-        return extracted_text.strip() if extracted_text else "No text found in the PDF."
-
+        return extracted_text if extracted_text.strip() else "No text found in the PDF."
     except Exception as e:
         return f"Error extracting text: {e}"
-
    
+
+
 
 
 def extract_images_from_pdf(pdf_path, output_folder):
     """Extracts images from a PDF and saves them as image files."""
     try:
         os.makedirs(output_folder, exist_ok=True)
-        reader = PdfReader(pdf_path)
+        doc = fitz.open(pdf_path)
         image_count = 0
 
-        for page_num, page in enumerate(reader.pages):
-            if "/XObject" in page.resources:
-                xObject = page.resources["/XObject"].get_object()
+        for page_num, page in enumerate(doc):
+            for img_index, img in enumerate(page.get_images(full=True)):
+                xref = img[0]
+                base_image = doc.extract_image(xref)
+                img_bytes = base_image["image"]
+                img_ext = base_image["ext"]
 
-                for obj in xObject:
-                    if xObject[obj]["/Subtype"] == "/Image":
-                        image_data = xObject[obj]._data
-                        image_ext = xObject[obj]["/Filter"][1:] if isinstance(xObject[obj]["/Filter"], list) else xObject[obj]["/Filter"]
+                # Save extracted image
+                image_filename = os.path.join(output_folder, f"image_{page_num + 1}_{img_index + 1}.{img_ext}")
+                with open(image_filename, "wb") as image_file:
+                    image_file.write(img_bytes)
 
-                        if image_ext == "/DCTDecode":
-                            ext = "jpg"
-                        elif image_ext == "/JPXDecode":
-                            ext = "jp2"
-                        elif image_ext == "/FlateDecode":
-                            ext = "png"
-                        else:
-                            ext = "bin"
-
-                        image_filename = os.path.join(output_folder, f"image_{page_num + 1}_{image_count + 1}.{ext}")
-                        with open(image_filename, "wb") as image_file:
-                            image_file.write(image_data)
-
-                        image_count += 1
+                image_count += 1
 
         return {"message": f"Extracted {image_count} images.", "output_folder": output_folder}
     
     except Exception as e:
         return {"error": f"Error extracting images from PDF: {e}"}
+
     
 def rotate_pdf(input_pdf_path, output_pdf_path, rotations):
     """
@@ -300,6 +298,8 @@ def sign_pdf(input_pdf_path, output_pdf_path, signature_image_path, page_number,
 
     except Exception as e:
         return {"error": f"Error signing PDF: {e}"}
+
+
 
 
 

@@ -20,18 +20,39 @@ export const mergePDFs = (formData) =>
 export const splitPDF = (formData) => api.post("/pdf/split", formData,{
   responseType: "blob", // Expect a file response
 });
-export const extractText = (formData) => api.post("/pdf/extract-text", formData);
-export const extractImages = (formData) => api.post("/pdf/extract-images", formData);
-export const signPDF = (formData) => api.post("/pdf/sign", formData);
-export const protectPDF = (formData) => api.post("/pdf/protect", formData);
-export const rotatePDF = (formData) => api.post("/pdf/rotate", formData);
-export const compressPDF = (formData) => api.post("/pdf/compress", formData);
+export const extractText = (formData) => api.post("/pdf/extract_text", formData,{
+  responseType:"blob",
+}
+
+);
+export const extractImages = (formData) => api.post("/pdf/extract_images", formData);
+export const signPDF = (formData) => api.post("/pdf/sign", formData,{
+  responseType: "blob",
+});
+export const protectPDF = (formData) => api.post("/pdf/protect", formData,{
+  responseType: "blob",
+});
+export const rotatePDF = (formData) => api.post("/pdf/rotate", formData,{
+  responseType: "blob",
+});
+export const compressPDF = (formData) => api.post("/pdf/compress", formData,{
+  responseType:"blob",
+});
 
 // TTS API
-export const textToSpeech = (formData) => api.post("/api/tts", formData);
-export const speechToText = (formData) => api.post("/api/stt", formData);
+export const textToSpeech = (formData) => api.post("/tts/convert", formData,{
+  responseType:"blob",
+});
+export const convertSpeechToText = (formData) =>
+  api.post("/stt/convert", formData);
+
+// STT API - Convert Microphone (Base64) Audio to Text
+export const convertSpeechFromMic = (audioBase64) =>
+  api.post("/stt/convert", { audio_base64: audioBase64 });
 
 // Translate API
-export const translateText = (formData) => api.post("/api/translate", formData);
+export const translateText = (formData) => api.post("/api/translate", formData,{
+  responseType:"blob",
+});
 
 export default api;

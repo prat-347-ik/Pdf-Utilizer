@@ -6,12 +6,25 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    // Simulate fetching user data (Replace with real authentication logic)
-    setUser({ name: "John Doe" });
+    // Load stored user from localStorage if available
+    const storedUser = localStorage.getItem("username");
+    if (storedUser) {
+      setUser({ username: storedUser });
+    }
   }, []);
 
+  const login = (username) => {
+    localStorage.setItem("username", username);
+    setUser({ username });
+  };
+
+  const logout = () => {
+    localStorage.removeItem("username");
+    setUser(null);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, setUser }}>
+    <AuthContext.Provider value={{ user, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

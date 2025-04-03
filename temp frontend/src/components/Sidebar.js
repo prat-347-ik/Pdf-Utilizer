@@ -12,7 +12,7 @@ const Sidebar = () => {
       {/* Dashboard */}
       <ul className="space-y-2">
         <li>
-          <Link to="/" className="flex items-center space-x-2 p-2 hover:bg-gray-200 rounded-md">
+          <Link to="/Dashboard" className="flex items-center space-x-2 p-2 hover:bg-gray-200 rounded-md">
             <Home className="w-6 h-6" />
             <span>Dashboard</span>
           </Link>

@@ -31,8 +31,8 @@ def create_app():
 
     app.register_blueprint(auth_bp, url_prefix="/auth")
     app.register_blueprint(pdf_bp, url_prefix="/pdf")
-    app.register_blueprint(tts_bp, url_prefix="/api/tts")
-    app.register_blueprint(stt_bp, url_prefix="/api/stt")
+    app.register_blueprint(tts_bp, url_prefix="/tts")
+    app.register_blueprint(stt_bp, url_prefix="/stt")
     app.register_blueprint(translate_bp, url_prefix="/api")
 
     # Create database tables

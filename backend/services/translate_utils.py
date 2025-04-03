@@ -56,10 +56,10 @@ def select_font_for_language(language_code):
         "zh-cn": "NotoSansSC.ttf",  # Simplified Chinese
         "ar": "NotoNaskhArabic.ttf",  # Arabic
         "ja": "NotoSansJP.ttf",  # Japanese
-        "ko": "NotoSansKR.ttf",  # Korean
+        "ko": "NotoSansKR-Black.ttf",  # Korean
     }
 
-    font_file = font_mapping.get(language_code, "Arial.ttf")  # Default to Arial for Latin-based languages
+    font_file = font_mapping.get(language_code, "Arimo.ttf")  # Default to Arial for Latin-based languages
     font_path = os.path.join(FONT_DIR, font_file)
 
     if not os.path.exists(font_path):

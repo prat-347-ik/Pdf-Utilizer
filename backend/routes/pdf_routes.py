@@ -1,8 +1,10 @@
 import os
+import io
 import time
 import json
+from fpdf import FPDF
 from flask_cors import CORS
-from PyPDF2 import PdfReader
+from PyPDF2 import PdfReader,PdfWriter
 from flask import Blueprint, request, jsonify, send_file, current_app
 from werkzeug.utils import secure_filename
 from backend.services.pdf_utils import merge_pdfs, split_pdf, compress_pdf, extract_text_from_pdf, extract_images_from_pdf,protect_pdf,sign_pdf,rotate_pdf  
@@ -88,20 +90,47 @@ def split():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
 @pdf_bp.route("/extract_text", methods=["POST"])
 def extract_text():
     try:
-        file = request.files["file"]
-        if not file:
+        if "file" not in request.files:
             return jsonify({"error": "No file provided"}), 400
 
+        file = request.files["file"]
         filename = secure_filename(file.filename)
-        file_path = os.path.join("uploads", filename)
+
+        # Ensure upload directory exists
+        upload_dir = os.path.join(os.getcwd(), "backend", "uploads", "extracted_text_pdfs")
+        os.makedirs(upload_dir, exist_ok=True)
+
+        # Save the uploaded file
+        file_path = os.path.join(upload_dir, filename)
         file.save(file_path)
 
+        # Extract text from PDF
         extracted_text = extract_text_from_pdf(file_path)
-        return jsonify({"text": extracted_text})
+        if not extracted_text.strip():
+            return jsonify({"error": "No text found in the PDF."}), 400
+
+        # Generate new PDF filename
+        timestamp = int(time.time())
+        pdf_filename = f"extracted_text_{timestamp}.pdf"
+        pdf_path = os.path.join(upload_dir, pdf_filename)
+
+        # ✅ FIX: Use a Unicode Font
+        pdf = FPDF()
+        pdf.set_auto_page_break(auto=True, margin=15)
+        pdf.add_page()
+
+        # 🔹 Load a Unicode-compatible font (Arimo or another TTF)
+        font_path = os.path.join(os.getcwd(), "backend", "fonts", "Arimo.ttf")
+        pdf.add_font("DejaVu", "", font_path, uni=True)
+        pdf.set_font("DejaVu", size=12)
+
+        pdf.multi_cell(0, 10, extracted_text)
+        pdf.output(pdf_path, "F")
+
+        return send_file(pdf_path, as_attachment=True, download_name=pdf_filename)
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -109,19 +138,54 @@ def extract_text():
 @pdf_bp.route("/extract_images", methods=["POST"])
 def extract_images():
     try:
-        file = request.files["file"]
-        if not file:
+        if "file" not in request.files:
             return jsonify({"error": "No file provided"}), 400
 
+        file = request.files["file"]
         filename = secure_filename(file.filename)
-        file_path = os.path.join("uploads", filename)
+
+        # Ensure upload directory exists
+        upload_dir = os.path.join(os.getcwd(), "backend", "uploads", "extracted_images_pdfs")
+        os.makedirs(upload_dir, exist_ok=True)
+
+        # Save the uploaded file
+        file_path = os.path.join(upload_dir, filename)
         file.save(file_path)
 
-        extracted_images = extract_images_from_pdf(file_path)
-        return jsonify({"images": extracted_images})
+        # Extract images from PDF
+        image_output_folder = os.path.join(upload_dir, "images")
+        extraction_result = extract_images_from_pdf(file_path, image_output_folder)
+
+        if "error" in extraction_result:
+            return jsonify({"error": extraction_result["error"]}), 500
+
+        # Ensure images were extracted
+        extracted_images = [img for img in os.listdir(image_output_folder) if img.endswith((".jpg", ".png", ".jp2"))]
+        if not extracted_images:
+            return jsonify({"error": "No images found in the PDF."}), 400
+
+        # Generate a new PDF filename
+        timestamp = int(time.time())
+        pdf_filename = f"extracted_images_{timestamp}.pdf"
+        pdf_path = os.path.join(upload_dir, pdf_filename)
+
+        # ✅ Create a PDF with extracted images
+        pdf = FPDF()
+        pdf.set_auto_page_break(auto=True, margin=15)
+
+        for img_file in extracted_images:
+            img_path = os.path.join(image_output_folder, img_file)
+            pdf.add_page()
+            pdf.image(img_path, x=10, y=10, w=180)  # Adjust width as needed
+
+        pdf.output(pdf_path, "F")
+
+        return send_file(pdf_path, as_attachment=True, download_name=pdf_filename)
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
     
 @pdf_bp.route("/compress", methods=["POST"])
 def compress():
@@ -130,6 +194,10 @@ def compress():
             return jsonify({"error": "No file provided"}), 400
 
         file = request.files["file"]
+        compression_level = request.form.get("compression_level", "medium")  # Default to medium
+
+        if compression_level not in ["low", "medium", "high"]:
+            return jsonify({"error": "Invalid compression level. Choose low, medium, or high."}), 400
 
         # Ensure directory exists
         upload_dir = os.path.join(os.getcwd(), "backend", "uploads", "compressed_files")
@@ -141,17 +209,16 @@ def compress():
         file.save(file_path)
 
         # Generate a unique output filename
-        timestamp = int(time.time())  # Current timestamp
+        timestamp = int(time.time())
         compressed_filename = f"compressed_{timestamp}.pdf"
         compressed_output_path = os.path.join(upload_dir, compressed_filename)
 
-        # Call compress_pdf function and check if it succeeded
-        result = compress_pdf(file_path, compressed_output_path)
+        # Call compress_pdf function with compression level
+        result = compress_pdf(file_path, compressed_output_path, compression_level)
 
         if "error" in result:
             return jsonify({"error": result["error"]}), 500
 
-        # Ensure file was created successfully before sending
         if not os.path.exists(compressed_output_path):
             return jsonify({"error": "Compression failed, output file was not created."}), 500
 
@@ -159,6 +226,8 @@ def compress():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
 
 @pdf_bp.route("/rotate", methods=["POST"])
 def rotate():
@@ -248,48 +317,33 @@ def sign_pdf_route():
 
 
 CORS(pdf_bp) 
+
+
 @pdf_bp.route("/protect", methods=["POST"])
 def protect():
     try:
-        file = request.files.get("file")  # Get uploaded PDF file
-        password = request.form.get("password")  # Get password from request
+        file = request.files.get("file")
+        password = request.form.get("password")
 
         if not file or not password:
             return jsonify({"error": "File and password are required"}), 400
 
-        # Define upload directory
-        upload_dir = os.path.join(os.getcwd(), "backend", "uploads", "protected_files")
-        os.makedirs(upload_dir, exist_ok=True)  # Ensure directory exists
-
-        # Save uploaded file
         filename = secure_filename(file.filename)
-        input_pdf_path = os.path.join(upload_dir, filename)
-        file.save(input_pdf_path)
+        pdf_reader = PdfReader(file)
+        pdf_writer = PdfWriter()
 
-        # Generate protected output filename
-        protected_filename = f"protected_{int(time.time())}.pdf"
-        protected_output_path = os.path.join(upload_dir, protected_filename)
+        for page in pdf_reader.pages:
+            pdf_writer.add_page(page)
 
-        # Protect PDF
-        protect_pdf(input_pdf_path, protected_output_path, password)
+        pdf_writer.encrypt(password)
 
-        if not os.path.exists(protected_output_path) or os.path.getsize(protected_output_path) == 0:
-          return jsonify({"error": "Protected PDF was not generated correctly."}), 500
+        # Save to in-memory file
+        pdf_bytes = io.BytesIO()
+        pdf_writer.write(pdf_bytes)
+        pdf_bytes.seek(0)
 
-
-        # Debugging log
-        print(f"Protected PDF saved at: {protected_output_path}")
-
-        # Ensure the file is fully written before sending
-        return send_file(
-    protected_output_path,
-    as_attachment=True,
-    download_name=f"protected_{filename}",
-    mimetype="application/pdf",
-    cache_timeout=0  # Prevents caching issues
-)
-
+        # Return as downloadable file
+        return send_file(pdf_bytes, as_attachment=True, download_name=f"protected_{filename}", mimetype="application/pdf")
 
     except Exception as e:
-        print(f"Error in protect route: {e}")  # Debugging log
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": f"Error protecting PDF: {e}"}), 500
