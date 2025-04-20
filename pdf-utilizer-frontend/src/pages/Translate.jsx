@@ -1,8 +1,8 @@
 import { useState } from "react";
 import apiService from "../api/apiService";
 import { Upload, Download, Languages } from "lucide-react";
-import { motion } from "framer-motion"; // For smooth animations
-import Sidebar from "../components/Sidebar"; // ✅ Import Sidebar
+import { motion } from "framer-motion";
+import Sidebar from "../components/Sidebar";
 
 const TranslatePage = () => {
   const [file, setFile] = useState(null);
@@ -12,14 +12,13 @@ const TranslatePage = () => {
 
   const languages = [
     { code: "fr", name: "French" },
-    { code: "hi", name: "Hindi" },
+    //#endregion{ code: "it", name: "Italian" },
     { code: "zh-cn", name: "Chinese (Simplified)" },
     { code: "ar", name: "Arabic" },
     { code: "ja", name: "Japanese" },
     { code: "ko", name: "Korean" },
   ];
 
-  // Handle PDF translation
   const handleTranslatePDF = async () => {
     if (!file) return;
     setLoading(true);
@@ -41,20 +40,18 @@ const TranslatePage = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-blue-900 to-white text-gray-900 overflow-hidden">
-      <Sidebar /> {/* ✅ Sidebar Added */}
+    <div className="flex min-h-screen bg-gradient-to-br from-[#474E93] via-[#7E5CAD] to-[#FBB4A5] text-gray-900 overflow-hidden">
+      <Sidebar />
 
-      {/* ✅ Adjusted to make space for sidebar */}
       <div className="flex flex-1 justify-center items-center ml-64">
         <motion.div
-          className="w-full max-w-xl bg-white p-6 rounded-xl shadow-lg border border-blue-300"
+          className="w-full max-w-xl bg-white p-6 rounded-xl shadow-lg border border-[#72BAA9]"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
         >
-          {/* Page Heading */}
           <motion.h1
-            className="text-4xl font-bold mb-8 flex items-center gap-2 text-blue-800"
+            className="text-4xl font-bold mb-8 flex items-center gap-2 text-[#474E93]"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7 }}
@@ -62,9 +59,8 @@ const TranslatePage = () => {
             <Languages size={36} /> PDF Translation
           </motion.h1>
 
-          {/* File Upload Section */}
           <div className="mb-4">
-            <h2 className="text-lg font-semibold mb-3 text-blue-800 flex items-center gap-2">
+            <h2 className="text-lg font-semibold mb-3 text-[#474E93] flex items-center gap-2">
               <Upload size={20} /> Upload PDF for Translation
             </h2>
 
@@ -72,14 +68,13 @@ const TranslatePage = () => {
               type="file"
               accept="application/pdf"
               onChange={(e) => setFile(e.target.files[0])}
-              className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-purple-500 file:text-white hover:file:bg-purple-700 cursor-pointer"
+              className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[#7E5CAD] file:text-white hover:file:bg-[#474E93] cursor-pointer"
             />
           </div>
 
-          {/* Language Selection */}
           <div className="flex items-center gap-4 mb-4">
             <select
-              className="bg-blue-50 p-3 rounded-lg border border-blue-400 text-gray-800 focus:outline-none focus:border-blue-600 transition"
+              className="bg-[#EFF3EA] p-3 rounded-lg border border-[#B7B1F2] text-gray-800 focus:outline-none focus:border-[#7E5CAD] transition"
               value={language}
               onChange={(e) => setLanguage(e.target.value)}
             >
@@ -91,7 +86,7 @@ const TranslatePage = () => {
             </select>
 
             <motion.button
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold transition flex items-center gap-2"
+              className="bg-[#72BAA9] hover:bg-[#5BA697] text-white px-4 py-2 rounded-lg font-bold transition flex items-center gap-2"
               onClick={handleTranslatePDF}
               disabled={loading}
               whileHover={{ scale: 1.05 }}
@@ -100,7 +95,6 @@ const TranslatePage = () => {
             </motion.button>
           </div>
 
-          {/* Download Translated PDF */}
           {translatedFile && (
             <motion.div
               className="mt-6"
@@ -111,7 +105,7 @@ const TranslatePage = () => {
               <a
                 href={translatedFile}
                 download="translated_pdf.pdf"
-                className="bg-green-500 hover:bg-green-600 px-4 py-2 rounded-lg font-bold text-white transition flex items-center gap-2"
+                className="bg-[#FFE2E2] hover:bg-[#FFCFCF] px-4 py-2 rounded-lg font-bold text-white transition flex items-center gap-2"
               >
                 <Download size={18} /> Download Translated PDF
               </a>

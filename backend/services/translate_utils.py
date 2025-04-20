@@ -52,7 +52,7 @@ def select_font_for_language(language_code):
     :return: Path to the font file.
     """
     font_mapping = {
-        "hi": "NotoSansDevanagari.ttf",  # Hindi
+        #"hi": "NotoSansDevanagari.ttf",  # Hindi
         "zh-cn": "NotoSansSC.ttf",  # Simplified Chinese
         "ar": "NotoNaskhArabic.ttf",  # Arabic
         "ja": "NotoSansJP.ttf",  # Japanese

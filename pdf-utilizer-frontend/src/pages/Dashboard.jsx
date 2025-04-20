@@ -1,9 +1,20 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
-import { AuthContext } from "../context/AuthContext";
 import ToolCard from "../components/ToolCard";
-import { Scissors, FilePlus, FileText, Image, PenTool, Shield, RotateCw, Volume2, Mic, Languages, FileArchive } from "lucide-react";
+import {
+  Scissors,
+  FilePlus,
+  FileText,
+  Image,
+  PenTool,
+  Shield,
+  RotateCw,
+  Volume2,
+  Mic,
+  Languages,
+  FileArchive,
+} from "lucide-react";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -23,35 +34,34 @@ const tools = [
 
 export default function Dashboard() {
   const navigate = useNavigate();
- // const { user } = useContext(AuthContext);
-  const [username, setUsername] = useState("User");  
+   // const { user } = useContext(AuthContext);
+
+  const [username, setUsername] = useState("User");
 
   useEffect(() => {
     const storedUsername = localStorage.getItem("username");
     if (!storedUsername) {
-      navigate("/login");  // ✅ Redirect to login if no user is stored
+      navigate("/login");
     } else {
       setUsername(storedUsername);
     }
   }, [navigate]);
 
-
-
   return (
-    <div className="flex flex-col h-screen bg-[#FAF1E6] text-gray-900">
+    <div className="flex flex-col min-h-screen bg-[#FAF1E6] dark:bg-[#121212] text-gray-900 dark:text-white">
       <Navbar />
       <div className="p-8 flex flex-col items-center">
-        <h1 className="text-4xl font-bold mb-4 text-[#89AC46]">Welcome, {username}!</h1>
+        <h1 className="text-4xl font-bold mb-4 text-[#89AC46] dark:text-[#c0f08a]">Welcome, {username}!</h1>
         <p className="text-lg mb-6">Choose a tool to get started:</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
           {tools.map((tool, index) => (
-            <ToolCard 
-              key={index} 
-              name={tool.name} 
-              path={tool.path} 
-              description={tool.description} 
-              icon={tool.icon} 
-              className="w-52 h-52 flex flex-col items-center justify-center bg-white text-black rounded-xl shadow-lg p-6 hover:shadow-2xl transition"
+            <ToolCard
+              key={index}
+              name={tool.name}
+              path={tool.path}
+              description={tool.description}
+              icon={tool.icon}
+              index={index}
             />
           ))}
         </div>

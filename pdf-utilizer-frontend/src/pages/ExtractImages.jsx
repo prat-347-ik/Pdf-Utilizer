@@ -1,20 +1,23 @@
 import { useState } from "react";
 import { extractImages } from "../api/apiService";
 import Sidebar from "../components/Sidebar";
-import { motion } from "framer-motion"; // ✅ Import Framer Motion
+import { motion } from "framer-motion";
 
 const ExtractImages = () => {
   const [file, setFile] = useState(null);
-  const [extractedImages, setExtractedImages] = useState([]);
-  const [extractedPdf, setExtractedPdf] = useState(null);
+  const [extractedFile, setExtractedFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: "", text: "" });
 
-  const handleFileChange = (event) => setFile(event.target.files[0]);
+  const handleFileChange = (event) => {
+    setFile(event.target.files[0]);
+    setExtractedFile(null);
+    setMessage({ type: "", text: "" });
+  };
 
   const handleExtract = async () => {
     if (!file) {
-      setMessage({ type: "error", text: "Please select a PDF to extract images." });
+      setMessage({ type: "error", text: "Please select a PDF to extract images from." });
       return;
     }
 
@@ -26,9 +29,9 @@ const ExtractImages = () => {
 
     try {
       const response = await extractImages(formData);
-      setExtractedImages(response.data.images);
-      setExtractedPdf(response.data.pdf_path);
-      setMessage({ type: "success", text: "Images extracted successfully!" });
+      const blob = new Blob([response.data], { type: "application/pdf" });
+      setExtractedFile(URL.createObjectURL(blob));
+      setMessage({ type: "success", text: "Image extraction complete!" });
     } catch (error) {
       console.error("Extraction error:", error);
       setMessage({ type: "error", text: "Error extracting images. Please try again." });
@@ -38,7 +41,7 @@ const ExtractImages = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gradient-to-r from-blue-200 to-gray-200">
+    <div className="flex h-screen" style={{ backgroundColor: "#F5EEDD" }}>
       <Sidebar />
 
       <motion.div
@@ -48,14 +51,14 @@ const ExtractImages = () => {
         transition={{ duration: 0.6 }}
       >
         <motion.div
-          className="p-6 w-full max-w-xl bg-white shadow-lg rounded-lg"
+          className="p-6 w-full max-w-xl bg-white shadow-lg rounded-2xl"
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
         >
-          {/* Title */}
           <motion.h2
-            className="text-2xl font-bold mb-4 text-center text-blue-600"
+            className="text-2xl font-bold mb-4 text-center"
+            style={{ color: "#077A7D" }}
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
@@ -63,7 +66,6 @@ const ExtractImages = () => {
             Extract Images from PDF
           </motion.h2>
 
-          {/* Message Box */}
           {message.text && (
             <motion.div
               className={`mb-4 p-3 rounded text-center ${
@@ -81,80 +83,51 @@ const ExtractImages = () => {
             </motion.div>
           )}
 
-          {/* File Upload */}
-          <motion.div
-            className="mb-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5 }}
-          >
+          <div className="mb-4">
             <label className="block text-gray-700 font-semibold mb-1">Select PDF:</label>
             <input
               type="file"
               accept="application/pdf"
               onChange={handleFileChange}
-              className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-700 cursor-pointer"
+              className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold"
+              style={{
+                backgroundColor: "#7AE2CF",
+                color: "#06202B",
+              }}
             />
-          </motion.div>
+          </div>
 
-          {/* Extract Button */}
           <motion.button
             onClick={handleExtract}
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition disabled:bg-gray-400"
+            className="w-full text-white py-2 px-4 rounded-md transition disabled:bg-gray-400"
             whileHover={{ scale: 1.05 }}
+            style={{
+              backgroundColor: loading ? "#999999" : "#077A7D",
+              cursor: loading ? "not-allowed" : "pointer",
+            }}
           >
             {loading ? "Extracting..." : "Extract Images"}
           </motion.button>
 
-          {/* Extracted Images Grid */}
-          {extractedImages.length > 0 && (
+          {extractedFile && (
             <motion.div
-              className="mt-4"
-              initial="hidden"
-              animate="visible"
-              variants={{
-                hidden: { opacity: 0 },
-                visible: {
-                  opacity: 1,
-                  transition: { staggerChildren: 0.2 },
-                },
-              }}
-            >
-              <h3 className="text-lg font-semibold text-blue-700 mb-2">Extracted Images:</h3>
-              <div className="grid grid-cols-2 gap-2">
-                {extractedImages.map((img, index) => (
-                  <motion.img
-                    key={index}
-                    src={img}
-                    alt={`Extracted ${index + 1}`}
-                    className="w-full h-auto rounded"
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.4 }}
-                  />
-                ))}
-              </div>
-            </motion.div>
-          )}
-
-          {/* Download PDF Button */}
-          {extractedPdf && (
-            <motion.div
-              className="mt-4 text-center"
+              className="mt-6 text-center"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5 }}
             >
-              <p className="text-green-600 font-semibold">Download all extracted images as a PDF:</p>
-              <motion.a
-                href={extractedPdf}
-                download="Extracted_Images.pdf"
-                className="mt-2 inline-block bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition"
+              <p className="text-green-600 font-semibold mb-2">
+                Extracted PDF is ready:
+              </p>
+              <motion.button
+                onClick={() => window.open(extractedFile, "_blank")}
+                className="text-white py-2 px-2 rounded-md"
+                style={{ backgroundColor: "#06202B" }}
                 whileHover={{ scale: 1.05 }}
               >
-                Download PDF
-              </motion.a>
+                Download Extracted PDF
+              </motion.button>
             </motion.div>
           )}
         </motion.div>

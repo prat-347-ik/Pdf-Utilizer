@@ -8,47 +8,47 @@ Noto Sans Devanagari is a variable font with these axes:
   wght
 
 This means all the styles are contained in a single file:
-  Noto_Sans_Devanagari/NotoSansDevanagari-VariableFont_wdth,wght.ttf
+  NotoSansDevanagari-VariableFont_wdth,wght.ttf
 
 If your app fully supports variable fonts, you can now pick intermediate styles
 that aren’t available as static fonts. Not all apps support variable fonts, and
 in those cases you can use the static font files for Noto Sans Devanagari:
-  Noto_Sans_Devanagari/static/NotoSansDevanagari_ExtraCondensed-Thin.ttf
-  Noto_Sans_Devanagari/static/NotoSansDevanagari_ExtraCondensed-ExtraLight.ttf
-  Noto_Sans_Devanagari/static/NotoSansDevanagari_ExtraCondensed-Light.ttf
-  Noto_Sans_Devanagari/static/NotoSansDevanagari_ExtraCondensed-Regular.ttf
-  Noto_Sans_Devanagari/static/NotoSansDevanagari_ExtraCondensed-Medium.ttf
-  Noto_Sans_Devanagari/static/NotoSansDevanagari_ExtraCondensed-SemiBold.ttf
-  Noto_Sans_Devanagari/static/NotoSansDevanagari_ExtraCondensed-Bold.ttf
-  Noto_Sans_Devanagari/static/NotoSansDevanagari_ExtraCondensed-ExtraBold.ttf
-  Noto_Sans_Devanagari/static/NotoSansDevanagari_ExtraCondensed-Black.ttf
-  Noto_Sans_Devanagari/static/NotoSansDevanagari_Condensed-Thin.ttf
-  Noto_Sans_Devanagari/static/NotoSansDevanagari_Condensed-ExtraLight.ttf
-  Noto_Sans_Devanagari/static/NotoSansDevanagari_Condensed-Light.ttf
-  Noto_Sans_Devanagari/static/NotoSansDevanagari_Condensed-Regular.ttf
-  Noto_Sans_Devanagari/static/NotoSansDevanagari_Condensed-Medium.ttf
-  Noto_Sans_Devanagari/static/NotoSansDevanagari_Condensed-SemiBold.ttf
-  Noto_Sans_Devanagari/static/NotoSansDevanagari_Condensed-Bold.ttf
-  Noto_Sans_Devanagari/static/NotoSansDevanagari_Condensed-ExtraBold.ttf
-  Noto_Sans_Devanagari/static/NotoSansDevanagari_Condensed-Black.ttf
-  Noto_Sans_Devanagari/static/NotoSansDevanagari_SemiCondensed-Thin.ttf
-  Noto_Sans_Devanagari/static/NotoSansDevanagari_SemiCondensed-ExtraLight.ttf
-  Noto_Sans_Devanagari/static/NotoSansDevanagari_SemiCondensed-Light.ttf
-  Noto_Sans_Devanagari/static/NotoSansDevanagari_SemiCondensed-Regular.ttf
-  Noto_Sans_Devanagari/static/NotoSansDevanagari_SemiCondensed-Medium.ttf
-  Noto_Sans_Devanagari/static/NotoSansDevanagari_SemiCondensed-SemiBold.ttf
-  Noto_Sans_Devanagari/static/NotoSansDevanagari_SemiCondensed-Bold.ttf
-  Noto_Sans_Devanagari/static/NotoSansDevanagari_SemiCondensed-ExtraBold.ttf
-  Noto_Sans_Devanagari/static/NotoSansDevanagari_SemiCondensed-Black.ttf
-  Noto_Sans_Devanagari/static/NotoSansDevanagari-Thin.ttf
-  Noto_Sans_Devanagari/static/NotoSansDevanagari-ExtraLight.ttf
-  Noto_Sans_Devanagari/static/NotoSansDevanagari-Light.ttf
-  Noto_Sans_Devanagari/static/NotoSansDevanagari-Regular.ttf
-  Noto_Sans_Devanagari/static/NotoSansDevanagari-Medium.ttf
-  Noto_Sans_Devanagari/static/NotoSansDevanagari-SemiBold.ttf
-  Noto_Sans_Devanagari/static/NotoSansDevanagari-Bold.ttf
-  Noto_Sans_Devanagari/static/NotoSansDevanagari-ExtraBold.ttf
-  Noto_Sans_Devanagari/static/NotoSansDevanagari-Black.ttf
+  static/NotoSansDevanagari_ExtraCondensed-Thin.ttf
+  static/NotoSansDevanagari_ExtraCondensed-ExtraLight.ttf
+  static/NotoSansDevanagari_ExtraCondensed-Light.ttf
+  static/NotoSansDevanagari_ExtraCondensed-Regular.ttf
+  static/NotoSansDevanagari_ExtraCondensed-Medium.ttf
+  static/NotoSansDevanagari_ExtraCondensed-SemiBold.ttf
+  static/NotoSansDevanagari_ExtraCondensed-Bold.ttf
+  static/NotoSansDevanagari_ExtraCondensed-ExtraBold.ttf
+  static/NotoSansDevanagari_ExtraCondensed-Black.ttf
+  static/NotoSansDevanagari_Condensed-Thin.ttf
+  static/NotoSansDevanagari_Condensed-ExtraLight.ttf
+  static/NotoSansDevanagari_Condensed-Light.ttf
+  static/NotoSansDevanagari_Condensed-Regular.ttf
+  static/NotoSansDevanagari_Condensed-Medium.ttf
+  static/NotoSansDevanagari_Condensed-SemiBold.ttf
+  static/NotoSansDevanagari_Condensed-Bold.ttf
+  static/NotoSansDevanagari_Condensed-ExtraBold.ttf
+  static/NotoSansDevanagari_Condensed-Black.ttf
+  static/NotoSansDevanagari_SemiCondensed-Thin.ttf
+  static/NotoSansDevanagari_SemiCondensed-ExtraLight.ttf
+  static/NotoSansDevanagari_SemiCondensed-Light.ttf
+  static/NotoSansDevanagari_SemiCondensed-Regular.ttf
+  static/NotoSansDevanagari_SemiCondensed-Medium.ttf
+  static/NotoSansDevanagari_SemiCondensed-SemiBold.ttf
+  static/NotoSansDevanagari_SemiCondensed-Bold.ttf
+  static/NotoSansDevanagari_SemiCondensed-ExtraBold.ttf
+  static/NotoSansDevanagari_SemiCondensed-Black.ttf
+  static/NotoSansDevanagari-Thin.ttf
+  static/NotoSansDevanagari-ExtraLight.ttf
+  static/NotoSansDevanagari-Light.ttf
+  static/NotoSansDevanagari-Regular.ttf
+  static/NotoSansDevanagari-Medium.ttf
+  static/NotoSansDevanagari-SemiBold.ttf
+  static/NotoSansDevanagari-Bold.ttf
+  static/NotoSansDevanagari-ExtraBold.ttf
+  static/NotoSansDevanagari-Black.ttf
 
 Get started
 -----------

@@ -135,7 +135,7 @@ def extract_text():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@pdf_bp.route("/extract_images", methods=["POST"])
+@pdf_bp.route("/extract-images", methods=["POST"])
 def extract_images():
     try:
         if "file" not in request.files:
@@ -144,46 +144,54 @@ def extract_images():
         file = request.files["file"]
         filename = secure_filename(file.filename)
 
-        # Ensure upload directory exists
-        upload_dir = os.path.join(os.getcwd(), "backend", "uploads", "extracted_images_pdfs")
-        os.makedirs(upload_dir, exist_ok=True)
+        # Create directories
+        base_dir = os.path.join(os.getcwd(), "backend", "uploads", "extracted_images_pdfs")
+        image_output_folder = os.path.join(base_dir, "image_output_folder")
+        os.makedirs(image_output_folder, exist_ok=True)
 
         # Save the uploaded file
-        file_path = os.path.join(upload_dir, filename)
+        file_path = os.path.join(base_dir, filename)
         file.save(file_path)
 
-        # Extract images from PDF
-        image_output_folder = os.path.join(upload_dir, "images")
+        # Extract images
         extraction_result = extract_images_from_pdf(file_path, image_output_folder)
 
         if "error" in extraction_result:
             return jsonify({"error": extraction_result["error"]}), 500
 
-        # Ensure images were extracted
-        extracted_images = [img for img in os.listdir(image_output_folder) if img.endswith((".jpg", ".png", ".jp2"))]
+        # Collect valid image files
+        extracted_images = sorted([
+            os.path.join(image_output_folder, img)
+            for img in os.listdir(image_output_folder)
+            if img.lower().endswith((".jpeg",".jpg", ".png", ".jp2"))
+        ])
+
         if not extracted_images:
             return jsonify({"error": "No images found in the PDF."}), 400
 
-        # Generate a new PDF filename
-        timestamp = int(time.time())
-        pdf_filename = f"extracted_images_{timestamp}.pdf"
-        pdf_path = os.path.join(upload_dir, pdf_filename)
+        # Create a PDF with the extracted images
+        from fpdf import FPDF
 
-        # ✅ Create a PDF with extracted images
         pdf = FPDF()
         pdf.set_auto_page_break(auto=True, margin=15)
 
-        for img_file in extracted_images:
-            img_path = os.path.join(image_output_folder, img_file)
+        for img_path in extracted_images:
             pdf.add_page()
-            pdf.image(img_path, x=10, y=10, w=180)  # Adjust width as needed
 
+            # Get image dimensions to optionally scale appropriately
+            pdf.image(img_path, x=10, y=10, w=180)
+
+        # Save final image-only PDF
+        timestamp = int(time.time())
+        pdf_filename = f"images_only_{timestamp}.pdf"
+        pdf_path = os.path.join(base_dir, pdf_filename)
         pdf.output(pdf_path, "F")
 
         return send_file(pdf_path, as_attachment=True, download_name=pdf_filename)
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 
     

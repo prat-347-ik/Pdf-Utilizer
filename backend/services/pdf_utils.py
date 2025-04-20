@@ -7,14 +7,19 @@ import io
 
 from fpdf import FPDF
 
+import os
+from fpdf import FPDF
+
 def create_pdf_from_text(text, output_pdf_path):
     """
     Creates a PDF from the given text.
-
     :param text: The text content to include in the PDF.
     :param output_pdf_path: Path to save the generated PDF.
     """
     try:
+        # ✅ Ensure the directory exists
+        os.makedirs(os.path.dirname(output_pdf_path), exist_ok=True)
+
         pdf = FPDF()
         pdf.set_auto_page_break(auto=True, margin=15)
         pdf.add_page()
@@ -29,6 +34,7 @@ def create_pdf_from_text(text, output_pdf_path):
 
     except Exception as e:
         raise Exception(f"Error creating PDF: {e}")
+
 
 
 def split_pdf(input_pdf_path, page_numbers, output_folder):
