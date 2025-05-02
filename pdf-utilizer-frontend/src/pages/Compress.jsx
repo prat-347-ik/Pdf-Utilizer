@@ -113,9 +113,9 @@ const CompressPDF = () => {
               onChange={handleCompressionChange}
               className="w-full p-2 border rounded-md"
             >
-              <option value="low">Low (Less Compression, Better Quality)</option>
+              <option value="low">High (Maximum Compression, Low Quality)</option>
               <option value="medium">Medium (Balanced)</option>
-              <option value="high">High (Maximum Compression, Low Quality)</option>
+              <option value="high">Low (Less Compression, Better Quality)</option>
             </select>
           </motion.div>
 
