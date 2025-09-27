@@ -38,9 +38,10 @@ Thumbs.db
 *.sw?
 
 temp frontend/
+tts_output/
 uploads/
 stt_pdfs/
 stt_audio/
 outputs'/
 backend/uploads/
-Project Report/
+Project_Report/
