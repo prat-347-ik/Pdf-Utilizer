@@ -36,3 +36,11 @@ Thumbs.db
 *.njsproj
 *.sln
 *.sw?
+
+temp frontend/
+uploads/
+stt_pdfs/
+stt_audio/
+outputs'/
+backend/uploads/
+Project Report/
