@@ -1,170 +1,225 @@
-// --- IMPORTS ---
-import { PDFDocument } from 'pdf-lib';
-import fs from 'fs/promises';
 import path from 'path';
+import fs from 'fs/promises';
+import { createWriteStream } from 'fs';
+import archiver from 'archiver'; // For zipping images
+import { runPythonScript } from '../services/pythonService.js';
 
-// Manual Permission Object (Fixes "Permission not found" in Node.js ESM)
-const Permission = {
-  Print: 4,
-  Modify: 8,
-  Copy: 16,
-  Annotate: 32,
-  FillForms: 256,
-  Extract: 512,
-  Assemble: 1024,
-  PrintHighResolution: 2048,
+// Helper to delete temp files
+const cleanup = async (files) => {
+    const fileList = Array.isArray(files) ? files : [files];
+    await Promise.all(fileList.map(f => fs.unlink(f).catch(() => {})));
 };
 
-// --- MERGE PDFs ---
 export const mergePDFs = async (req, res) => {
-  try {
-    if (!req.files || req.files.length < 2) {
-      return res.status(400).json({ error: 'Please upload at least 2 PDF files.' });
-    }
-
-    const mergedPdf = await PDFDocument.create();
-
-    for (const file of req.files) {
-      const fileBuffer = await fs.readFile(file.path);
-      const pdf = await PDFDocument.load(fileBuffer);
-      const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
-      copiedPages.forEach((page) => mergedPdf.addPage(page));
-      await fs.unlink(file.path); 
-    }
-
-    const pdfBytes = await mergedPdf.save();
-    
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', 'attachment; filename=merged.pdf');
-    res.send(Buffer.from(pdfBytes));
-
-  } catch (error) {
-    console.error('Merge Error:', error);
-    res.status(500).json({ error: 'Failed to merge PDFs' });
-  }
-};
-
-// --- SPLIT PDF ---
-export const splitPDF = async (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ error: 'Please upload a PDF file.' });
-    }
-
-    const { pages } = req.body; 
-    if (!pages) {
-      return res.status(400).json({ error: 'Page numbers are required.' });
-    }
-
-    let pageNumbers;
     try {
-      pageNumbers = JSON.parse(pages); 
-      if (!Array.isArray(pageNumbers)) throw new Error();
-    } catch (e) {
-      return res.status(400).json({ error: 'Invalid page format.' });
-    }
+        if (!req.files || req.files.length < 2) return res.status(400).json({ error: 'Upload at least 2 files' });
+        
+        const filePaths = req.files.map(f => path.resolve(f.path));
+        const outputPath = path.resolve(`uploads/merged_${Date.now()}.pdf`);
 
-    const fileBuffer = await fs.readFile(req.file.path);
-    const srcPdf = await PDFDocument.load(fileBuffer);
-    const newPdf = await PDFDocument.create();
-    const totalPages = srcPdf.getPageCount();
+        const result = await runPythonScript('merge', { files: filePaths, output: outputPath });
 
-    const validPageIndices = pageNumbers
-      .map(num => parseInt(num) - 1)
-      .filter(index => index >= 0 && index < totalPages);
-
-    if (validPageIndices.length === 0) {
-        return res.status(400).json({ error: 'No valid pages found to split.' });
-    }
-
-    const copiedPages = await newPdf.copyPages(srcPdf, validPageIndices);
-    copiedPages.forEach((page) => newPdf.addPage(page));
-
-    const pdfBytes = await newPdf.save();
-    await fs.unlink(req.file.path); 
-
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', 'attachment; filename=split.pdf');
-    res.send(Buffer.from(pdfBytes));
-
-  } catch (error) {
-    console.error('Split Error:', error);
-    if (req.file) await fs.unlink(req.file.path).catch(() => {}); 
-    res.status(500).json({ error: 'Failed to split PDF' });
-  }
+        res.download(result.filePath, 'merged.pdf', () => cleanup([...filePaths, result.filePath]));
+    } catch (e) { res.status(500).json({ error: e.message }); }
 };
 
-// --- ROTATE PDF ---
+export const splitPDF = async (req, res) => {
+    try {
+        if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+        
+        // Parse pages (e.g., "1,3,5" or JSON "[1,3,5]")
+        let pages = req.body.pages;
+        if (typeof pages === 'string') {
+             pages = pages.includes(',') ? pages.split(',') : JSON.parse(pages);
+        }
+
+        const inputPath = path.resolve(req.file.path);
+        const outputFolder = path.resolve('uploads');
+
+        const result = await runPythonScript('split', { 
+            file: inputPath, 
+            pages: pages, 
+            output_folder: outputFolder 
+        });
+
+        res.download(result.filePath, 'split.pdf', () => cleanup([inputPath, result.filePath]));
+    } catch (e) { res.status(500).json({ error: e.message }); }
+};
+
 export const rotatePDF = async (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ error: 'Please upload a PDF file.' });
-    }
+    try {
+        if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
 
-    const rotation = parseInt(req.body.rotation) || 90; 
+        const inputPath = path.resolve(req.file.path);
+        const outputPath = path.resolve(`uploads/rotated_${Date.now()}.pdf`);
+        const angle = parseInt(req.body.rotation) || 90;
+        const pageNum = parseInt(req.body.page) || 1; // Default to page 1 if not specified
 
-    const fileBuffer = await fs.readFile(req.file.path);
-    const pdfDoc = await PDFDocument.load(fileBuffer);
-    const pages = pdfDoc.getPages();
+        // Construct rotation dict { page_number: angle }
+        // You can enhance this to accept a map for multiple pages
+        const rotations = { [pageNum]: angle };
 
-    pages.forEach((page) => {
-      const currentRotation = page.getRotation().angle;
-      page.setRotation({ type: 'degrees', angle: currentRotation + rotation });
-    });
+        const result = await runPythonScript('rotate', { 
+            file: inputPath, 
+            output: outputPath, 
+            rotations 
+        });
 
-    const pdfBytes = await pdfDoc.save();
-    await fs.unlink(req.file.path);
-
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', 'attachment; filename=rotated.pdf');
-    res.send(Buffer.from(pdfBytes));
-
-  } catch (error) {
-    console.error('Rotate Error:', error);
-    res.status(500).json({ error: 'Failed to rotate PDF' });
-  }
+        res.download(result.filePath, 'rotated.pdf', () => cleanup([inputPath, result.filePath]));
+    } catch (e) { res.status(500).json({ error: e.message }); }
 };
 
-// --- PROTECT PDF ---
 export const protectPDF = async (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ error: 'Please upload a PDF file.' });
+    try {
+        if (!req.file || !req.body.password) return res.status(400).json({ error: 'File and password required' });
+
+        const inputPath = path.resolve(req.file.path);
+        const outputPath = path.resolve(`uploads/protected_${Date.now()}.pdf`);
+
+        const result = await runPythonScript('protect', {
+            file: inputPath,
+            output: outputPath,
+            password: req.body.password
+        });
+
+        res.download(result.filePath, 'protected.pdf', () => cleanup([inputPath, result.filePath]));
+    } catch (e) { res.status(500).json({ error: e.message }); }
+};
+
+export const compressPDF = async (req, res) => {
+    try {
+        if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+
+        const inputPath = path.resolve(req.file.path);
+        const outputPath = path.resolve(`uploads/compressed_${Date.now()}.pdf`);
+
+        const result = await runPythonScript('compress', {
+            file: inputPath,
+            output: outputPath,
+            level: req.body.level || 'medium'
+        });
+
+        res.download(result.filePath, 'compressed.pdf', () => cleanup([inputPath, result.filePath]));
+    } catch (e) { res.status(500).json({ error: e.message }); }
+};
+
+export const extractText = async (req, res) => {
+    try {
+        if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+        const inputPath = path.resolve(req.file.path);
+
+        const result = await runPythonScript('extract_text', { file: inputPath });
+
+        res.json({ success: true, text: result.text });
+        await cleanup(inputPath);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+};
+
+
+
+
+
+export const extractImages = async (req, res) => {
+    // defined outside try/catch to be accessible in cleanup
+    let inputPath, outputFolder, zipPath;
+
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'No file uploaded' });
+        }
+        
+        inputPath = path.resolve(req.file.path);
+        outputFolder = path.resolve(`uploads/images_${Date.now()}`);
+        zipPath = `${outputFolder}.zip`;
+
+        console.log(`[Extract Images] Processing: ${inputPath}`);
+
+        // 1. Run Python to extract images
+        // If this fails, it throws an error and jumps to catch block (sending JSON)
+        const result = await runPythonScript('extract_images', { 
+            file: inputPath, 
+            output_folder: outputFolder 
+        });
+
+        console.log(`[Extract Images] Python success. Images in: ${result.folder}`);
+
+        // 2. Create the ZIP file
+        const output = createWriteStream(zipPath);
+        const archive = archiver('zip', { zlib: { level: 9 } });
+
+        // 3. Set up event listeners BEFORE processing
+        output.on('close', () => {
+             console.log(`[Extract Images] Zipping complete (${archive.pointer()} bytes). Sending file...`);
+             
+             // Send the ZIP file to the client
+             res.download(zipPath, 'extracted_images.zip', async (err) => {
+                if (err) {
+                    console.error("[Extract Images] Download/Send Error:", err);
+                    // Cannot send JSON error here because headers are already sent
+                }
+                
+                // Cleanup everything
+                await cleanup([inputPath, zipPath]);
+                if (outputFolder) {
+                    await fs.rm(outputFolder, { recursive: true, force: true }).catch(() => {});
+                }
+             });
+        });
+
+        // Handle archiving errors explicitly
+        archive.on('error', (err) => {
+            throw err; // Forward to catch block
+        });
+
+        // 4. Start Archiving
+        archive.pipe(output);
+        
+        // Append files from the output folder into the zip
+        archive.directory(result.folder, false);
+        
+        // Finalize the archive (this triggers the 'close' event above)
+        await archive.finalize();
+
+    } catch (e) { 
+        console.error("[Extract Images] Controller Error:", e);
+        
+        // Cleanup on error
+        if (inputPath) await cleanup(inputPath);
+        if (outputFolder) await fs.rm(outputFolder, { recursive: true, force: true }).catch(() => {});
+        if (zipPath) await cleanup(zipPath);
+
+        // This is why you see raw JSON: We send the error details back to the client.
+        if (!res.headersSent) {
+            res.status(500).json({ error: e.message || 'Image extraction failed' });
+        }
     }
+};
+export const signPDF = async (req, res) => {
+    try {
+        // Requires upload.fields([{name: 'file'}, {name: 'signature'}])
+        if (!req.files || !req.files.file || !req.files.signature) {
+            return res.status(400).json({ error: 'PDF and Signature image required' });
+        }
 
-    const { password } = req.body;
-    if (!password) {
-      await fs.unlink(req.file.path);
-      return res.status(400).json({ error: 'Password is required.' });
-    }
+        const pdfPath = path.resolve(req.files.file[0].path);
+        const sigPath = path.resolve(req.files.signature[0].path);
+        const outputPath = path.resolve(`uploads/signed_${Date.now()}.pdf`);
 
-    const fileBuffer = await fs.readFile(req.file.path);
-    const pdfDoc = await PDFDocument.load(fileBuffer);
+        // Get position from body
+        const x = parseFloat(req.body.x) || 100;
+        const y = parseFloat(req.body.y) || 100;
+        const width = parseFloat(req.body.width) || 100;
+        const height = parseFloat(req.body.height) || 50;
+        const page = parseInt(req.body.pageNumber) || 1;
 
-    // DEBUG: Verify library version capabilities
-    if (!pdfDoc.encrypt) {
-      throw new Error("Your installed version of pdf-lib is too old! Run 'npm install pdf-lib@latest'");
-    }
+        const result = await runPythonScript('sign', {
+            file: pdfPath,
+            output: outputPath,
+            signature_img: sigPath,
+            page: page,
+            position: [x, y, width, height]
+        });
 
-    pdfDoc.encrypt({
-      userPassword: password,
-      ownerPassword: password,
-      permissions: [
-        Permission.Print, // 4
-        Permission.Copy,  // 16
-      ],
-    });
-
-    const pdfBytes = await pdfDoc.save();
-    await fs.unlink(req.file.path);
-
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', 'attachment; filename=protected.pdf');
-    res.send(Buffer.from(pdfBytes));
-
-  } catch (error) {
-    console.error('Protect Error:', error);
-    if (req.file) await fs.unlink(req.file.path).catch(() => {});
-    res.status(500).json({ error: error.message || 'Failed to protect PDF' });
-  }
+        res.download(result.filePath, 'signed.pdf', () => cleanup([pdfPath, sigPath, result.filePath]));
+    } catch (e) { res.status(500).json({ error: e.message }); }
 };

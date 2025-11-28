@@ -19,13 +19,20 @@ const storage = multer.diskStorage({
   }
 });
 
-// Filter to only allow PDFs
+// Updated Filter: Allows PDFs generally, and Images specifically for the 'signature' field
 const fileFilter = (req, file, cb) => {
+  // Allow PDF files
   if (file.mimetype === 'application/pdf') {
-    cb(null, true);
-  } else {
-    cb(new Error('Only PDF files are allowed!'), false);
+    return cb(null, true);
   }
+  
+  // Allow Images (JPEG, PNG) - Useful for Signature upload
+  if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png' || file.mimetype === 'image/jpg') {
+    return cb(null, true);
+  }
+
+  // Reject other files
+  cb(new Error('Only PDF and Image (PNG/JPG) files are allowed!'), false);
 };
 
 const upload = multer({ 
