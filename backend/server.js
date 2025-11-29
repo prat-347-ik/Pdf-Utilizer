@@ -7,6 +7,7 @@ import { connectDB } from './src/config/db.js';
 // Import Routes
 import authRoutes from './src/routes/authRoutes.js';
 import pdfRoutes from './src/routes/pdfRoutes.js'; 
+import translateRoutes from './src/routes/translateRoutes.js'; // Add this
 //import sttRoutes from './src/routes/sttRoutes.js'; // Add this
 //import ttsRoutes from './src/routes/ttsRoutes.js'; // Add this
 
@@ -24,6 +25,7 @@ connectDB();
 // Use Routes
 app.use('/auth', authRoutes);
 app.use('/pdf', pdfRoutes);
+app.use('/api', translateRoutes);
 //app.use('/tts', ttsRoutes); // Add this
 //app.use('/stt', sttRoutes); // Add this
 

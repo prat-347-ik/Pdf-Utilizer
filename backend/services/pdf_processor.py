@@ -2,6 +2,10 @@ import sys
 import json
 import os
 
+
+#  Import the translate function
+from translate_utils import translate_pdf
+
 # Import functions from your provided utils file
 from pdf_utils import (
     merge_pdfs, split_pdf, rotate_pdf, protect_pdf, 
@@ -86,6 +90,17 @@ def main():
            )
             if "error" in result: raise Exception(result['error'])
             send_response(True, data={"filePath": result['output_file']})
+
+# --- 10. TRANSLATE ---
+        elif operation == "translate":
+            # Payload: { "file": "...", "output": "...", "lang": "es" }
+            result = translate_pdf(
+                payload['file'], 
+                payload['output'], 
+                payload['lang']
+            )
+            if "error" in result: raise Exception(result['error'])
+            send_response(True, data={"filePath": result['output_path']})
 
         else:
             raise Exception(f"Unknown operation: {operation}")

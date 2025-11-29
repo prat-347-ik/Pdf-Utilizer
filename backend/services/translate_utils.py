@@ -1,68 +1,90 @@
-import os
-from googletrans import Translator
+import fitz  # PyMuPDF
+from deep_translator import GoogleTranslator
 from fpdf import FPDF
+import os
+import pathlib
 
-# Ensure fonts directory exists
-FONT_DIR = os.path.join(os.getcwd(), "backend", "fonts")
-os.makedirs(FONT_DIR, exist_ok=True)
+def translate_pdf(input_path, output_path, target_lang='es'):
+    try:
+        # 1. Initialize Translator
+        translator = GoogleTranslator(source='auto', target=target_lang)
+        
+        doc = fitz.open(input_path)
+        full_text = ""
+        for page in doc:
+            full_text += page.get_text() + "\n\n"
+        
+        if not full_text.strip():
+            return {"error": "No text found in PDF."}
 
-translator = Translator()
+        # 2. Translate (Chunking logic)
+        chunks = []
+        current_chunk = ""
+        for line in full_text.split('\n'):
+            if len(current_chunk) + len(line) < 4500:
+                current_chunk += line + "\n"
+            else:
+                chunks.append(current_chunk)
+                current_chunk = line + "\n"
+        if current_chunk:
+            chunks.append(current_chunk)
 
-def translate_text(text, target_language):
-    """
-    Translates text to the target language.
+        translated_text = ""
+        for chunk in chunks:
+            try:
+                translated_text += translator.translate(chunk) + "\n"
+            except Exception:
+                pass # Silently skip errors to avoid breaking JSON output
 
-    :param text: The text to translate.
-    :param target_language: The target language (e.g., "fr" for French, "hi" for Hindi).
-    :return: Translated text.
-    """
-    if not isinstance(text, str):
-        return {"error": "Invalid input. Expected a string."}  # Ensure input is a string
+        # 3. Create PDF
+        pdf = FPDF()
+        pdf.add_page()
 
-    translator = Translator()
-    translated = translator.translate(text.strip(), dest=target_language)
+        # Define paths
+        fonts_dir = pathlib.Path(__file__).parent.parent / "fonts"
+        
+        font_map = {
+            "DejaVu": "DejaVuSans.ttf",
+            "Hindi": "NotoSansDevanagari-Regular.ttf",
+            "Chinese": "NotoSansSC-Regular.ttf",
+            "Japanese": "NotoSansJP-Regular.ttf",
+            "Korean": "NotoSansKR-Regular.ttf"
+        }
 
-    return translated.text
+        # Enable Complex Text Shaping
+        try:
+            pdf.set_text_shaping(True) 
+        except Exception:
+            pass # Silent failure
 
+        # Register Main Font
+        main_font_path = fonts_dir / font_map["DejaVu"]
+        if main_font_path.exists():
+            pdf.add_font("DejaVu", style="", fname=str(main_font_path))
+            pdf.set_font("DejaVu", size=12)
+        else:
+            return {"error": f"Main font missing at {main_font_path}"}
 
-def create_pdf_from_text(text, output_path, language_code):
-    """
-    Creates a PDF from the translated text.
+        # Register Fallback Fonts
+        available_fallbacks = []
+        for name, filename in font_map.items():
+            if name == "DejaVu": continue 
+            
+            f_path = fonts_dir / filename
+            if f_path.exists():
+                pdf.add_font(name, style="", fname=str(f_path))
+                available_fallbacks.append(name)
+                # print(f"Loaded fallback font: {name}")  <-- REMOVED THIS LINE
+        
+        if available_fallbacks:
+            pdf.set_fallback_fonts(available_fallbacks)
 
-    :param text: The translated text.
-    :param output_path: Path to save the output PDF.
-    :param language_code: The language code to determine font usage.
-    """
-    pdf = FPDF()
-    pdf.add_page()
+        # Write Text
+        pdf.multi_cell(0, 10, translated_text)
+        
+        pdf.output(output_path)
+        return {"message": "Translation successful", "output_path": output_path}
 
-    # Select font based on language
-    font_path = select_font_for_language(language_code)
-    pdf.add_font("CustomFont", "", font_path, uni=True)
-    pdf.set_font("CustomFont", size=12)
-
-    pdf.multi_cell(0, 10, text)
-    pdf.output(output_path, "F")
-
-def select_font_for_language(language_code):
-    """
-    Selects an appropriate font for non-Latin languages.
-
-    :param language_code: Language code (e.g., "hi" for Hindi, "zh-cn" for Chinese).
-    :return: Path to the font file.
-    """
-    font_mapping = {
-        #"hi": "NotoSansDevanagari.ttf",  # Hindi
-        "zh-cn": "NotoSansSC.ttf",  # Simplified Chinese
-        "ar": "NotoNaskhArabic.ttf",  # Arabic
-        "ja": "NotoSansJP.ttf",  # Japanese
-        "ko": "NotoSansKR-Black.ttf",  # Korean
-    }
-
-    font_file = font_mapping.get(language_code, "Arimo.ttf")  # Default to Arial for Latin-based languages
-    font_path = os.path.join(FONT_DIR, font_file)
-
-    if not os.path.exists(font_path):
-        raise FileNotFoundError(f"Font file '{font_file}' not found in {FONT_DIR}. Please add it.")
-
-    return font_path
+    except Exception as e:
+        # print(f"Translation Error: {e}") <-- REMOVED THIS LINE
+        return {"error": f"Translation failed: {str(e)}"}
