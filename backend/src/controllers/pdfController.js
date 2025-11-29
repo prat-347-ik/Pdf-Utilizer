@@ -119,7 +119,15 @@ export const compressPDF = async (req, res) => {
         if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
 
         const inputPath = path.resolve(req.file.path);
+        // Keep a unique server-side path to prevent conflicts
         const outputPath = path.resolve(`uploads/compressed_${Date.now()}.pdf`);
+
+        // 1. Get original name without extension (e.g., "Contract" from "Contract.pdf")
+        const originalName = req.file.originalname;
+        const nameWithoutExt = path.parse(originalName).name;
+        
+        // 2. Create the new download name
+        const downloadName = `${nameWithoutExt}_compressed.pdf`;
 
         const result = await runPythonScript('compress', {
             file: inputPath,
@@ -127,8 +135,15 @@ export const compressPDF = async (req, res) => {
             level: req.body.level || 'medium'
         });
 
-        res.download(result.filePath, 'compressed.pdf', () => cleanup([inputPath, result.filePath]));
-    } catch (e) { res.status(500).json({ error: e.message }); }
+        // 3. Send file with the custom name
+        res.download(result.filePath, downloadName, (err) => {
+            if (err) console.error("Download error:", err);
+            cleanup([inputPath, result.filePath]);
+        });
+
+    } catch (e) { 
+        res.status(500).json({ error: e.message }); 
+    }
 };
 
 export const extractText = async (req, res) => {
