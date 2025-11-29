@@ -73,6 +73,7 @@ def split_pdf(input_pdf_path, page_numbers, output_folder):
     
     except Exception as e:
         return {"error": f"Error splitting PDF: {e}"}
+    
 
 def merge_pdfs(pdf_list, output_path):
     """Merges multiple PDF files into a single PDF."""
@@ -82,10 +83,21 @@ def merge_pdfs(pdf_list, output_path):
             return {"error": "No PDFs provided for merging."}
 
         for pdf in pdf_list:
+            # 1. Check if file exists
             if not os.path.exists(pdf):
                 return {"error": f"File not found: {pdf}"}
-            merger.append(pdf)
+            
+            # 2. Check if file is empty (0 bytes)
+            if os.path.getsize(pdf) == 0:
+                return {"error": f"File is empty and cannot be merged: {os.path.basename(pdf)}"}
 
+            # 3. Try to append, catching specific PDF errors per file
+            try:
+                merger.append(pdf)
+            except Exception as e:
+                return {"error": f"Corrupted or invalid PDF '{os.path.basename(pdf)}': {str(e)}"}
+
+        # 4. Write output
         with open(output_path, 'wb') as output_file:
             merger.write(output_file)
 
@@ -101,82 +113,124 @@ def merge_pdfs(pdf_list, output_path):
 
 
 
+import fitz  # PyMuPDF
+from PIL import Image
+import io
+
 def compress_pdf(input_pdf_path, output_pdf_path, compression_level="medium"):
     """
-    Compresses a PDF by reducing image size and quality while preserving text-based content.
-
-    :param input_pdf_path: Path to the input PDF file.
-    :param output_pdf_path: Path to save the compressed PDF.
-    :param compression_level: Compression level ('low', 'medium', 'high')
+    Compresses PDF by resizing images and converting non-transparent images to JPEG.
+    Handles transparency correctly to avoid black backgrounds.
     """
     try:
-        # Define compression settings based on level
-        compression_settings = {
-            "low": {"quality": 30, "scale_factor": 0.3},   # More compression, lower quality
-            "medium": {"quality": 50, "scale_factor": 0.5},  # Balanced compression
-            "high": {"quality": 80, "scale_factor": 0.8},  # Less compression, higher quality
+        # Compression Settings
+        # dpi: Target resolution (72 is standard screen)
+        # quality: JPEG quality (1-100)
+        settings = {
+            "low":    {"dpi": 200, "quality": 80},
+            "medium": {"dpi": 144, "quality": 65},
+            "high":   {"dpi": 72,  "quality": 40},
         }
+        
+        params = settings.get(compression_level, settings["medium"])
+        target_dpi = params["dpi"]
+        quality = params["quality"]
 
-        # Get the selected compression settings, default to medium
-        settings = compression_settings.get(compression_level, compression_settings["medium"])
-        quality = settings["quality"]
-        scale_factor = settings["scale_factor"]
-
-        # Open the PDF
         doc = fitz.open(input_pdf_path)
+        
+        # Track processed images to avoid processing the same shared image twice
+        processed_xrefs = set()
 
-        for page_index in range(len(doc)):
-            page = doc[page_index]
-            images = page.get_images(full=True)  # Get all images in the page
+        for page in doc:
+            # get_images returns: (xref, smask, width, height, bpc, colorspace, ...)
+            images = page.get_images(full=True)
+            
+            for img in images:
+                xref = img[0]
+                if xref in processed_xrefs:
+                    continue
+                processed_xrefs.add(xref)
 
-            for img_index, img in enumerate(images):
-                xref = img[0]  # Image reference (xref)
-                base_image = doc.extract_image(xref)  # Extract image data
-                img_bytes = base_image["image"]
+                # 1. Extract raw image
+                try:
+                    base_image = doc.extract_image(xref)
+                except Exception:
+                    continue # Skip if extraction fails
 
-                # Open image with PIL
-                img_pil = Image.open(io.BytesIO(img_bytes))
+                image_bytes = base_image["image"]
+                
+                # 2. Open with PIL
+                try:
+                    img_pil = Image.open(io.BytesIO(image_bytes))
+                except Exception:
+                    continue 
 
-                # Convert RGBA (transparent) images to RGB
-                if img_pil.mode == "RGBA":
-                    img_pil = img_pil.convert("RGB")
+                # 3. Check Dimensions & DPI
+                width, height = img_pil.size
+                # Estimate current DPI (assuming image is displayed at 100% scale for calculation)
+                # If images are huge (e.g. 3000px wide), we definitely want to shrink them
+                if width < 200 and height < 200:
+                    continue # Skip small icons/logos to keep them sharp
 
-                # Resize the image using Pillow (PIL)
-                new_width = int(img_pil.width * scale_factor)
-                new_height = int(img_pil.height * scale_factor)
-
-                if new_width > 0 and new_height > 0:
+                # simple logic: if it's larger than target visual size, resize it.
+                # Here we just use a max width heuristic for simplicity and safety
+                max_dim = 2000 # Default max
+                if compression_level == "high": max_dim = 1000
+                elif compression_level == "medium": max_dim = 1500
+                
+                # If image is massive, scale it down
+                if width > max_dim or height > max_dim:
+                    ratio = min(max_dim / width, max_dim / height)
+                    new_width = int(width * ratio)
+                    new_height = int(height * ratio)
                     img_pil = img_pil.resize((new_width, new_height), Image.LANCZOS)
+                
+                # 4. Handle Transparency & Format
+                buffer = io.BytesIO()
+                
+                # Check if image has Alpha (Transparency)
+                if img_pil.mode in ("RGBA", "LA") or (img_pil.mode == "P" and "transparency" in img_pil.info):
+                    # ✅ Case A: Transparent Image -> Must save as PNG to prevent black background
+                    # We accept slightly larger file size to preserve quality
+                    img_pil.save(buffer, format="PNG", optimize=True)
+                else:
+                    # ✅ Case B: Standard Image -> Convert to RGB and Compress as JPEG
+                    if img_pil.mode != "RGB":
+                        img_pil = img_pil.convert("RGB")
+                    img_pil.save(buffer, format="JPEG", quality=quality, optimize=True)
 
-                # Convert image to JPEG with compression
-                img_buffer = io.BytesIO()
-                img_pil.save(img_buffer, format="JPEG", quality=quality)
-                img_buffer.seek(0)
+                # 5. Replace Image (Crucial Fix)
+                # Using page.replace_image automatically updates the PDF dictionary (Filter/Width/Height)
+                # so the viewer knows we changed the format.
+                page.replace_image(xref, stream=buffer.getvalue())
 
-                # Get the image bounding box (position)
-                rects = page.get_image_rects(xref)
-                if rects:
-                    rect = rects[0]  # Take the first bounding box
+                # --- STEP 2: TEXT & FONT OPTIMIZATION (The Fix) ---
+        # This removes unused characters from embedded fonts.
+        # E.g., if a font has 10,000 chars but you only use "A", "B", "C", 
+        # it removes the other 9,997.
+        doc.subset_fonts()
 
-                    # Remove the old image from the page
-                    page.delete_image(xref)
+        # --- STEP 3: SAVE WITH STRUCTURE COMPRESSION ---
+        # scrub(): Removes metadata, hidden layers, comments
+        # garbage=4: Aggressive deduplication
+        # deflate=True: Compresses content streams
+        # use_objstms=1: Compresses the PDF object structure itself (Crucial for text PDFs)
+        doc.scrub()
+        doc.save(output_pdf_path, garbage=4, deflate=True, use_objstms=1)
+        doc.close()
 
-                    # Insert the new compressed image
-                    page.insert_image(rect, stream=img_buffer.getvalue())
 
-        # Save compressed PDF
-        doc.save(output_pdf_path, garbage=4, deflate=True)  # Optimize and compress
+
+        # 6. Save with Garbage Collection
+        doc.scrub() # Remove hidden metadata
+        doc.save(output_pdf_path, garbage=4, deflate=True)
         doc.close()
 
         return {"message": "PDF compressed successfully", "output_path": output_pdf_path}
 
     except Exception as e:
-        return {"error": f"Error compressing PDF: {e}"}
-
-
-
-
-
+        print(f"Compression Error: {e}")
+        return {"error": f"Error compressing PDF: {str(e)}"}
 
 
 def extract_text_from_pdf(pdf_path):

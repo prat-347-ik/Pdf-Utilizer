@@ -27,10 +27,38 @@ export const splitPDF = async (req, res) => {
     try {
         if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
         
-        // Parse pages (e.g., "1,3,5" or JSON "[1,3,5]")
+        // Parse pages
         let pages = req.body.pages;
+        
+        // Handle string input from FormData
         if (typeof pages === 'string') {
-             pages = pages.includes(',') ? pages.split(',') : JSON.parse(pages);
+            // Check if it's a JSON array string like "[1, 2]"
+            if (pages.trim().startsWith('[')) {
+                pages = JSON.parse(pages);
+            } 
+            // Check if it's comma-separated like "1,2,3"
+            else if (pages.includes(',')) {
+                pages = pages.split(',');
+            } 
+            // Fallback for single number like "1"
+            else {
+                // Try parsing as JSON (handles "1" -> 1)
+                try {
+                    const parsed = JSON.parse(pages);
+                    pages = [parsed]; // Wrap in array
+                } catch {
+                    pages = [pages]; // Keep as string in array
+                }
+            }
+        } 
+        // Handle if it came in as a raw number
+        else if (typeof pages === 'number') {
+            pages = [pages];
+        }
+
+        // Final Safety Check: Ensure it is an array
+        if (!Array.isArray(pages)) {
+            pages = [pages];
         }
 
         const inputPath = path.resolve(req.file.path);
@@ -195,31 +223,43 @@ export const extractImages = async (req, res) => {
     }
 };
 export const signPDF = async (req, res) => {
+    let pdfPath, sigPath, outputPath; // Define variables for cleanup scope
+
     try {
-        // Requires upload.fields([{name: 'file'}, {name: 'signature'}])
         if (!req.files || !req.files.file || !req.files.signature) {
             return res.status(400).json({ error: 'PDF and Signature image required' });
         }
 
-        const pdfPath = path.resolve(req.files.file[0].path);
-        const sigPath = path.resolve(req.files.signature[0].path);
-        const outputPath = path.resolve(`uploads/signed_${Date.now()}.pdf`);
+        // 1. Store paths in variables so we can clean them up later
+        pdfPath = path.resolve(req.files.file[0].path);
+        sigPath = path.resolve(req.files.signature[0].path);
+        outputPath = path.resolve(`uploads/signed_${Date.now()}.pdf`);
 
-        // Get position from body
         const x = parseFloat(req.body.x) || 100;
         const y = parseFloat(req.body.y) || 100;
         const width = parseFloat(req.body.width) || 100;
         const height = parseFloat(req.body.height) || 50;
-        const page = parseInt(req.body.pageNumber) || 1;
+        const page = parseInt(req.body.page) || 1;
+        const allPages = req.body.all_pages === 'true';
 
         const result = await runPythonScript('sign', {
             file: pdfPath,
             output: outputPath,
             signature_img: sigPath,
             page: page,
-            position: [x, y, width, height]
+            position: [x, y, width, height],
+            all_pages: allPages
         });
 
-        res.download(result.filePath, 'signed.pdf', () => cleanup([pdfPath, sigPath, result.filePath]));
-    } catch (e) { res.status(500).json({ error: e.message }); }
+        // 2. ✅ FIX: Pass the actual variables to cleanup
+        res.download(result.filePath, 'signed.pdf', (err) => {
+            if (err) console.error("Download error:", err);
+            cleanup([pdfPath, sigPath, result.filePath]); 
+        });
+
+    } catch (e) { 
+        // Attempt cleanup even on error
+        if (pdfPath && sigPath) cleanup([pdfPath, sigPath]);
+        res.status(500).json({ error: e.message }); 
+    }
 };

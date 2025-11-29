@@ -20,11 +20,8 @@ export const mergePDFs = (formData) =>
 export const splitPDF = (formData) => api.post("/pdf/split", formData,{
   responseType: "blob", // Expect a file response
 });
-export const extractText = (formData) => api.post("/pdf/extract_text", formData,{
-  responseType:"blob",
-}
+export const extractText = (formData) => api.post("/pdf/extract-text", formData); // Removed responseType blob
 
-);
 export const extractImages = (formData) => api.post("/pdf/extract-images", formData,{
   responseType:"blob",
 });

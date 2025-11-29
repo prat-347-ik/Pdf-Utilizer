@@ -13,7 +13,7 @@ const Sidebar = () => {
     { name: "Split PDF", path: "/split", icon: <Scissors size={20} /> },
     { name: "Extract Text", path: "/extract-text", icon: <FileText size={20} /> },
     { name: "Extract Images", path: "/extract-images", icon: <Image size={20} /> },
-    { name: "Sign PDF", path: "/sign", icon: <PenTool size={20} /> },
+    { name: "Sign PDF", path: "/smart-sign", icon: <PenTool size={20} /> },
     { name: "Protect PDF", path: "/protect", icon: <Shield size={20} /> },
     { name: "Compress", path: "/compress", icon: <FileArchive size={20} /> },
     { name: "Rotate PDF", path: "/rotate", icon: <RotateCcw size={20} /> },

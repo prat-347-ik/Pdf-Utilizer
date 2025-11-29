@@ -7,6 +7,8 @@ import { connectDB } from './src/config/db.js';
 // Import Routes
 import authRoutes from './src/routes/authRoutes.js';
 import pdfRoutes from './src/routes/pdfRoutes.js'; 
+//import sttRoutes from './src/routes/sttRoutes.js'; // Add this
+//import ttsRoutes from './src/routes/ttsRoutes.js'; // Add this
 
 dotenv.config();
 
@@ -22,6 +24,8 @@ connectDB();
 // Use Routes
 app.use('/auth', authRoutes);
 app.use('/pdf', pdfRoutes);
+//app.use('/tts', ttsRoutes); // Add this
+//app.use('/stt', sttRoutes); // Add this
 
 app.get('/', (req, res) => {
   res.send('PDF Utilizer Backend is Running!');

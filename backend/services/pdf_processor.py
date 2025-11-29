@@ -76,14 +76,14 @@ def main():
 
         # --- 9. SIGN ---
         elif operation == "sign":
-            # Expecting position as [x, y, w, h]
             result = sign_pdf(
-                payload['file'], 
-                payload['output'], 
-                payload['signature_img'], 
-                int(payload['page']), 
-                tuple(payload['position'])
-            )
+           payload['file'], 
+           payload['output'], 
+           payload['signature_img'], 
+           int(payload['page']), 
+           tuple(payload['position']),
+           payload.get('all_pages', False) # ✅ Get flag, default to False
+           )
             if "error" in result: raise Exception(result['error'])
             send_response(True, data={"filePath": result['output_file']})
 
