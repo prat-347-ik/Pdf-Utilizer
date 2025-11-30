@@ -1,7 +1,11 @@
 import { useState } from "react";
-import { rotatePDF } from "../api/apiService";
-import Sidebar from "../components/Sidebar";
-import { motion } from "framer-motion";
+import { rotatePDF } from "../api/apiService"; 
+import ToolLayout from "../components/ToolLayout";
+import { motion, AnimatePresence } from "framer-motion";
+import { 
+  RotateCw, UploadCloud, FileText, CheckCircle, AlertCircle, 
+  Download, RefreshCw, X, Layers
+} from "lucide-react";
 
 const RotatePDF = () => {
   const [file, setFile] = useState(null);
@@ -10,12 +14,15 @@ const RotatePDF = () => {
   const [selectedPages, setSelectedPages] = useState("");
   const [rotatedFile, setRotatedFile] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState({ type: "", text: "" });
+  const [message, setMessage] = useState(null);
 
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];
-    setFile(selectedFile);
-    setMessage({ type: "info", text: selectedFile ? "File selected: " + selectedFile.name : "" });
+    if (selectedFile) {
+      setFile(selectedFile);
+      setMessage(null);
+      setRotatedFile(null);
+    }
   };
 
   const handleRotate = async () => {
@@ -25,12 +32,12 @@ const RotatePDF = () => {
     }
 
     if (!allPages && !selectedPages.trim()) {
-      setMessage({ type: "error", text: "Please specify pages to rotate or select 'All Pages'." });
+      setMessage({ type: "error", text: "Please specify pages to rotate." });
       return;
     }
 
     setLoading(true);
-    setMessage({ type: "info", text: "Processing... Please wait." });
+    setMessage(null);
 
     const formData = new FormData();
     formData.append("file", file);
@@ -43,156 +50,217 @@ const RotatePDF = () => {
     try {
       const response = await rotatePDF(formData);
       const blob = new Blob([response.data], { type: "application/pdf" });
-      setRotatedFile(URL.createObjectURL(blob));
+      const url = URL.createObjectURL(blob);
+      setRotatedFile(url);
       setMessage({ type: "success", text: "PDF rotated successfully!" });
     } catch (error) {
       console.error("Rotate error:", error);
       setMessage({ type: "error", text: "Error rotating PDF. Please try again." });
     }
-
     setLoading(false);
   };
 
   return (
-    <div className="flex h-screen bg-[#F4F8D3]">
-      <Sidebar />
-
-      <motion.div
-        className="flex flex-1 justify-center items-center"
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-      >
-        <motion.div
-          className="p-6 w-full max-w-xl bg-[#F7CFD8] shadow-lg rounded-lg"
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
+    <ToolLayout
+      title="Rotate PDF"
+      description="Permanently rotate PDF pages. Fix orientation for all pages or specific ones."
+      theme="blue" // Uses Cyan/Blue gradient
+    >
+      <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-200px)]">
+        
+        {/* LEFT PANEL: Upload & Settings */}
+        <motion.div 
+          className="w-full lg:w-1/3 flex flex-col gap-6"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
         >
-          {/* Title */}
-          <motion.h2
-            className="text-2xl font-bold mb-4 text-center text-[#73C7C7]"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-          >
-            Rotate PDF
-          </motion.h2>
+          {/* Upload Card */}
+          <div className="bg-white/60 dark:bg-cyan-900/20 backdrop-blur-md p-6 rounded-3xl border border-cyan-200 dark:border-cyan-500/30 shadow-sm">
+            <h3 className="text-cyan-900 dark:text-cyan-200 font-bold mb-4 flex items-center gap-2">
+              <UploadCloud size={20}/> Upload Document
+            </h3>
 
-          {/* Message Box */}
-          {message.text && (
-            <motion.div
-              className={`mb-4 p-3 rounded text-center ${
-                message.type === "success"
-                  ? "bg-green-100 text-green-700"
-                  : message.type === "error"
-                  ? "bg-red-100 text-red-700"
-                  : "bg-yellow-100 text-yellow-700"
-              }`}
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4 }}
-            >
-              {message.text}
-            </motion.div>
-          )}
-
-          {/* File Upload */}
-          <motion.div className="mb-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
-            <input
-              type="file"
-              accept="application/pdf"
-              onChange={handleFileChange}
-              className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[#73C7C7] file:text-white hover:file:bg-[#5fb2b2] cursor-pointer"
-            />
-          </motion.div>
-
-          {/* Rotation Angle */}
-          <motion.div className="mb-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
-            <label className="block text-gray-700 font-semibold mb-1">Rotation Angle (°)</label>
-            <select
-              value={angle}
-              onChange={(e) => setAngle(e.target.value)}
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#A6F1E0]"
-            >
-              <option value={90}>90°</option>
-              <option value={180}>180°</option>
-              <option value={270}>270°</option>
-            </select>
-          </motion.div>
-
-          {/* Rotate All Pages Option */}
-          <motion.div className="mb-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
-            <label className="block text-gray-700 font-semibold mb-1">Rotate All Pages?</label>
-            <div className="flex items-center space-x-4">
-              <label className="flex items-center">
-                <input
-                  type="radio"
-                  name="allPages"
-                  checked={allPages}
-                  onChange={() => setAllPages(true)}
-                  className="mr-2"
-                />
-                Yes
-              </label>
-              <label className="flex items-center">
-                <input
-                  type="radio"
-                  name="allPages"
-                  checked={!allPages}
-                  onChange={() => setAllPages(false)}
-                  className="mr-2"
-                />
-                No
-              </label>
-            </div>
-          </motion.div>
-
-          {/* Selected Pages Input */}
-          {!allPages && (
-            <motion.div className="mb-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
-              <label className="block text-gray-700 font-semibold mb-1">Specify Pages (comma-separated)</label>
-              <input
-                type="text"
-                placeholder="e.g., 1,3,5"
-                value={selectedPages}
-                onChange={(e) => setSelectedPages(e.target.value)}
-                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#A6F1E0]"
-              />
-            </motion.div>
-          )}
-
-          {/* Rotate Button */}
-          <motion.button
-            className="w-full bg-[#73C7C7] text-white py-2 px-4 rounded-md hover:bg-[#5fb2b2] transition disabled:bg-gray-400"
-            onClick={handleRotate}
-            disabled={loading}
-            whileHover={{ scale: 1.05 }}
-          >
-            {loading ? "Rotating..." : "Rotate PDF"}
-          </motion.button>
-
-          {/* Download Button */}
-          {rotatedFile && (
-            <motion.div
-              className="mt-4 p-3 bg-[#A6F1E0] rounded text-center"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5 }}
-            >
-              <p className="text-gray-800 font-semibold">Rotated PDF is ready:</p>
-              <motion.button
-                onClick={() => window.open(rotatedFile, "_blank")}
-                className="mt-2 bg-[#73C7C7] text-white py-2 px-4 rounded-md hover:bg-[#5fb2b2] transition"
-                whileHover={{ scale: 1.05 }}
+            {!file ? (
+              <div className="relative group mb-6">
+                <input type="file" accept="application/pdf" onChange={handleFileChange} id="rotate-upload" className="hidden" />
+                <label
+                  htmlFor="rotate-upload"
+                  className="flex flex-col items-center justify-center h-40 border-2 border-dashed border-cyan-400/50 rounded-2xl bg-cyan-500/5 hover:bg-cyan-500/10 transition-all cursor-pointer"
+                >
+                  <div className="p-3 rounded-full bg-cyan-500/20 mb-3 group-hover:scale-110 transition-transform">
+                    <FileText className="w-8 h-8 text-cyan-600 dark:text-cyan-400" />
+                  </div>
+                  <p className="text-cyan-800 dark:text-cyan-200 font-medium">Select PDF</p>
+                  <p className="text-xs text-cyan-600 dark:text-cyan-400/60 mt-1">Fix Orientation</p>
+                </label>
+              </div>
+            ) : (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="flex items-center justify-between p-4 bg-cyan-50 dark:bg-cyan-500/10 border border-cyan-200 dark:border-cyan-500/30 rounded-2xl mb-6"
               >
-                Download Rotated PDF
-              </motion.button>
-            </motion.div>
+                <div className="flex items-center gap-3 overflow-hidden">
+                  <div className="p-2 bg-cyan-500/20 rounded-lg shrink-0">
+                    <FileText className="text-cyan-700 dark:text-cyan-300" size={24} />
+                  </div>
+                  <div className="min-w-0">
+                    <h3 className="text-gray-900 dark:text-white font-bold truncate text-sm">{file.name}</h3>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Ready to rotate</p>
+                  </div>
+                </div>
+                <button onClick={() => { setFile(null); setRotatedFile(null); }} className="p-1.5 hover:bg-black/5 dark:hover:bg-white/10 rounded-full text-gray-400 hover:text-red-500 transition shrink-0">
+                  <X size={18} />
+                </button>
+              </motion.div>
+            )}
+
+            {/* Rotation Controls */}
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 block">Rotation Angle</label>
+                <div className="flex gap-2">
+                  {[90, 180, 270].map((deg) => (
+                    <button
+                      key={deg}
+                      onClick={() => setAngle(deg)}
+                      className={`flex-1 py-2 rounded-xl text-sm font-medium transition ${
+                        angle === deg 
+                          ? "bg-cyan-600 text-white shadow-lg shadow-cyan-500/30" 
+                          : "bg-white dark:bg-white/10 text-gray-600 dark:text-gray-300 hover:bg-cyan-50 dark:hover:bg-white/20"
+                      }`}
+                    >
+                      {deg}°
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 block">Pages to Rotate</label>
+                <div className="flex items-center gap-4 mb-2">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input 
+                      type="radio" 
+                      checked={allPages} 
+                      onChange={() => setAllPages(true)}
+                      className="accent-cyan-600"
+                    />
+                    <span className="text-sm text-gray-600 dark:text-gray-400">All Pages</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input 
+                      type="radio" 
+                      checked={!allPages} 
+                      onChange={() => setAllPages(false)}
+                      className="accent-cyan-600"
+                    />
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Specific Pages</span>
+                  </label>
+                </div>
+                
+                <AnimatePresence>
+                  {!allPages && (
+                    <motion.input
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      type="text"
+                      placeholder="e.g. 1, 3-5"
+                      value={selectedPages}
+                      onChange={(e) => setSelectedPages(e.target.value)}
+                      className="w-full p-3 rounded-xl bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 outline-none focus:ring-2 focus:ring-cyan-500 text-gray-700 dark:text-white transition"
+                    />
+                  )}
+                </AnimatePresence>
+              </div>
+            </div>
+          </div>
+
+          {/* Status Message */}
+          <AnimatePresence>
+            {message && (
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                className={`p-4 rounded-2xl flex items-center gap-3 text-sm font-medium ${
+                  message.type === "error" 
+                    ? "bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-200 border border-red-200 dark:border-red-500/30" 
+                    : "bg-cyan-50 dark:bg-cyan-900/20 text-cyan-700 dark:text-cyan-200 border border-cyan-200 dark:border-cyan-500/30"
+                }`}
+              >
+                {message.type === "error" ? <AlertCircle size={18}/> : <CheckCircle size={18}/>}
+                {message.text}
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Action Button */}
+          <button 
+            onClick={handleRotate} 
+            disabled={loading || !file}
+            className="w-full py-4 rounded-xl font-bold shadow-lg text-white bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition transform active:scale-95 flex items-center justify-center gap-2 mt-auto"
+          >
+            {loading ? (
+              <span className="animate-pulse">Processing...</span>
+            ) : (
+              <><RotateCw size={20} /> Rotate PDF</>
+            )}
+          </button>
+        </motion.div>
+
+        {/* RIGHT PANEL: Visualization */}
+        <motion.div 
+          className="flex-1 flex flex-col bg-white/50 dark:bg-black/40 backdrop-blur-md rounded-3xl border border-gray-200 dark:border-white/10 shadow-inner overflow-hidden relative items-center justify-center"
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          {rotatedFile ? (
+            <div className="text-center p-8">
+              <div className="w-24 h-24 bg-cyan-100 dark:bg-cyan-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
+                <CheckCircle className="text-cyan-600 dark:text-cyan-400 w-12 h-12" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">Rotation Applied!</h3>
+              <p className="text-gray-500 dark:text-gray-300 mb-8 max-w-sm mx-auto">
+                Your document has been rotated successfully.
+              </p>
+              
+              <div className="flex gap-4 justify-center">
+                <button 
+                  onClick={() => { setRotatedFile(null); setFile(null); }}
+                  className="px-6 py-3 rounded-xl font-medium bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/20 transition"
+                >
+                  Start Over
+                </button>
+                <a 
+                  href={rotatedFile} 
+                  download="rotated_document.pdf"
+                  className="px-8 py-3 rounded-xl font-bold bg-cyan-600 hover:bg-cyan-500 text-white shadow-lg shadow-cyan-500/20 flex items-center gap-2 transition transform hover:scale-105"
+                >
+                  <Download size={20} /> Download PDF
+                </a>
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center text-gray-400/50 dark:text-white/20 pointer-events-none p-8 text-center">
+              {/* Animated Rotation Icon */}
+              <motion.div 
+                animate={{ rotate: angle }}
+                transition={{ type: "spring", stiffness: 60 }}
+                className="w-32 h-40 border-4 border-dashed border-current rounded-xl flex items-center justify-center mb-6 opacity-30 origin-center"
+              >
+                <FileText size={48} />
+              </motion.div>
+              <p className="text-lg font-medium">Rotation Preview</p>
+              <p className="text-sm">Current Angle: {angle}°</p>
+            </div>
           )}
         </motion.div>
-      </motion.div>
-    </div>
+
+      </div>
+    </ToolLayout>
   );
 };
 

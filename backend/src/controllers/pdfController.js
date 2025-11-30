@@ -80,7 +80,7 @@ export const rotatePDF = async (req, res) => {
 
         const inputPath = path.resolve(req.file.path);
         const outputPath = path.resolve(`uploads/rotated_${Date.now()}.pdf`);
-        const angle = parseInt(req.body.rotation) || 90;
+        const angle = parseInt(req.body.angle) || 90;
         const pageNum = parseInt(req.body.page) || 1; // Default to page 1 if not specified
 
         // Construct rotation dict { page_number: angle }

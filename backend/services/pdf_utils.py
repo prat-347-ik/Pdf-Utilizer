@@ -299,49 +299,35 @@ def rotate_pdf(input_pdf_path, output_pdf_path, rotations):
 
 import fitz  # PyMuPDF
 
-def sign_pdf(input_pdf_path, output_pdf_path, signature_image_path, page_number, position):
+def sign_pdf(input_pdf_path, output_pdf_path, signature_image_path, page_number, position, all_pages=False):
     """
-    Adds a signature image to a specific page of a PDF.
+    Signs a PDF by inserting an image signature.
 
-    :param input_pdf_path: str
-        Path to the input PDF file.
-    
-    :param output_pdf_path: str
-        Path where the signed PDF should be saved.
-    
-    :param signature_image_path: str
-        Path to the signature image file (PNG/JPG).
-    
-    :param page_number: int
-        The page number (1-based index) where the signature should be added.
-    
-    :param position: tuple (x, y, width, height)
-        - `x`: float → X-coordinate (from bottom-left corner) where the signature should be placed.
-        - `y`: float → Y-coordinate (from bottom-left corner).
-        - `width`: float → Width of the signature.
-        - `height`: float → Height of the signature.
-
+    :param input_pdf_path: Path to the input PDF.
+    :param output_pdf_path: Path to save the signed PDF.
+    :param signature_image_path: Path to the signature image.
+    :param page_number: The page number to sign (1-based index).
+    :param position: A tuple (x, y, width, height) for the signature placement.
+    :param all_pages: Boolean, if True signs all pages.
     :return: dict
-        A dictionary with success message or error message.
     """
     try:
-        # Load the PDF
         doc = fitz.open(input_pdf_path)
-
-        # Validate page number
-        if page_number < 1 or page_number > len(doc):
-            return {"error": "Invalid page number."}
-
-        # Select the target page (0-based index)
-        page = doc[page_number - 1]
-
-        # Unpack position tuple
         x, y, width, height = position
+        rect = fitz.Rect(x, y, x + width, y + height)
 
-        # Insert image (signature)
-        page.insert_image(fitz.Rect(x, y, x + width, y + height), filename=signature_image_path)
+        if all_pages:
+            for page in doc:
+                page.insert_image(rect, filename=signature_image_path)
+        else:
+            # Validate page number
+            if page_number < 1 or page_number > len(doc):
+                return {"error": "Invalid page number."}
+            
+            # Select the target page (0-based index)
+            page = doc[page_number - 1]
+            page.insert_image(rect, filename=signature_image_path)
 
-        # Save the modified PDF
         doc.save(output_pdf_path)
         doc.close()
 

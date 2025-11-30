@@ -1,11 +1,14 @@
 import { useState, useContext, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
+import { motion } from "framer-motion";
+import { LogIn, User, Lock, ArrowRight, AlertCircle, CheckCircle } from "lucide-react";
 
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -13,74 +16,109 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setMessage(null);
+
     try {
       const response = await axios.post("http://localhost:5000/auth/login", { username, password });
-
       localStorage.setItem("token", response.data.access_token);
       login(username);
-
-      setMessage({ type: "success", text: "Login successful" });
-
-      setTimeout(() => navigate("/Dashboard"), 1000);
+      setMessage({ type: "success", text: "Login successful! Redirecting..." });
+      setTimeout(() => navigate("/dashboard"), 1000);
     } catch (error) {
-      setMessage({ type: "error", text: error.response?.data?.error || "Login failed" });
-    }
-  };
-
-  const handleUsernameKeyDown = (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      passwordRef.current?.focus();
-    }
-  };
-
-  const handlePasswordKeyDown = (e) => {
-    if (e.key === "Enter") {
-      handleLogin(e);
+      setMessage({ type: "error", text: error.response?.data?.error || "Invalid credentials" });
+      setLoading(false);
     }
   };
 
   return (
-    <div className="flex justify-center items-center h-screen bg-gradient-to-br from-black via-gray-900 to-purple-900">
-      <div className="bg-gray-900 p-8 rounded-lg shadow-2xl w-96 text-white backdrop-blur-lg bg-opacity-90 border border-purple-500">
-        <h2 className="text-3xl font-bold mb-4 text-center tracking-wide text-purple-400">Login</h2>
+    <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center relative overflow-hidden">
+      
+      {/* Ambient Background Glows */}
+      <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-purple-600/30 rounded-full blur-[120px] animate-pulse" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse delay-1000" />
+
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-md p-8 bg-white/5 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-2xl relative z-10"
+      >
+        <div className="text-center mb-8">
+          <div className="w-16 h-16 bg-gradient-to-tr from-purple-500 to-blue-500 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg shadow-purple-500/20">
+            <LogIn size={32} className="text-white" />
+          </div>
+          <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
+            Welcome Back
+          </h2>
+          <p className="text-gray-400 mt-2 text-sm">Enter your credentials to access your workspace.</p>
+        </div>
 
         {message && (
-          <p
-            className={`mb-4 text-center p-2 rounded-md bg-opacity-80 ${
-              message.type === "error" ? "bg-red-600 text-white" : "bg-green-600 text-white"
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`p-3 mb-6 rounded-xl flex items-center gap-3 text-sm font-medium ${
+              message.type === "error" 
+                ? "bg-red-500/10 border border-red-500/20 text-red-400" 
+                : "bg-green-500/10 border border-green-500/20 text-green-400"
             }`}
           >
+            {message.type === "error" ? <AlertCircle size={18} /> : <CheckCircle size={18} />}
             {message.text}
-          </p>
+          </motion.div>
         )}
 
-        <input
-          type="text"
-          placeholder="Username"
-          className="w-full p-3 mb-3 border border-gray-700 bg-gray-800 text-white rounded focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all duration-200"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          onKeyDown={handleUsernameKeyDown}
-        />
+        <form onSubmit={handleLogin} className="space-y-5">
+          <div className="space-y-1">
+            <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider ml-1">Username</label>
+            <div className="relative group">
+              <User className="absolute left-4 top-3.5 text-gray-500 group-focus-within:text-purple-400 transition-colors" size={20} />
+              <input
+                type="text"
+                placeholder="johndoe"
+                className="w-full pl-12 pr-4 py-3 bg-black/20 border border-white/10 rounded-xl focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 outline-none transition-all text-white placeholder-gray-600"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+              />
+            </div>
+          </div>
 
-        <input
-          type="password"
-          placeholder="Password"
-          className="w-full p-3 mb-4 border border-gray-700 bg-gray-800 text-white rounded focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all duration-200"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          onKeyDown={handlePasswordKeyDown}
-          ref={passwordRef}
-        />
+          <div className="space-y-1">
+            <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider ml-1">Password</label>
+            <div className="relative group">
+              <Lock className="absolute left-4 top-3.5 text-gray-500 group-focus-within:text-purple-400 transition-colors" size={20} />
+              <input
+                type="password"
+                placeholder="••••••••"
+                className="w-full pl-12 pr-4 py-3 bg-black/20 border border-white/10 rounded-xl focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 outline-none transition-all text-white placeholder-gray-600"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                ref={passwordRef}
+              />
+            </div>
+          </div>
 
-        <button
-          className="w-full bg-pink-500 hover:bg-pink-400 text-white p-3 rounded font-bold transition-all duration-300 shadow-lg hover:shadow-purple-500"
-          onClick={handleLogin}
-        >
-          Login
-        </button>
-      </div>
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            disabled={loading}
+            className="w-full py-3.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-bold rounded-xl shadow-lg shadow-purple-500/25 flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+          >
+            {loading ? "Signing in..." : "Sign In"}
+            {!loading && <ArrowRight size={20} />}
+          </motion.button>
+        </form>
+
+        <div className="mt-8 text-center">
+          <p className="text-gray-500 text-sm">
+            Don't have an account?{" "}
+            <Link to="/register" className="text-purple-400 hover:text-purple-300 font-semibold transition-colors">
+              Create one
+            </Link>
+          </p>
+        </div>
+      </motion.div>
     </div>
   );
 };

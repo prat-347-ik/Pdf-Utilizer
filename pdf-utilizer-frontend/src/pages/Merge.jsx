@@ -1,18 +1,24 @@
 import { useState } from "react";
-import { mergePDFs } from "../api/apiService"; // Import API function
-import Sidebar from "../components/Sidebar";
-import { motion } from "framer-motion"; // ✅ Import Framer Motion
+import { mergePDFs } from "../api/apiService";
+import ToolLayout from "../components/ToolLayout"; // 👈 Import the new layout
+import { motion, AnimatePresence } from "framer-motion";
+import { UploadCloud, File, X, CheckCircle, AlertCircle, ArrowRight } from "lucide-react";
 
 const MergePDF = () => {
   const [files, setFiles] = useState([]);
   const [mergedFile, setMergedFile] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState({ type: "", text: "" });
+  const [message, setMessage] = useState(null);
 
   const handleFileChange = (event) => {
     const selectedFiles = Array.from(event.target.files);
-    setFiles(selectedFiles);
-    setMessage({ type: "info", text: `${selectedFiles.length} file(s) selected` });
+    // Append new files instead of replacing
+    setFiles((prev) => [...prev, ...selectedFiles]);
+    setMessage(null);
+  };
+
+  const removeFile = (indexToRemove) => {
+    setFiles(files.filter((_, index) => index !== indexToRemove));
   };
 
   const handleMerge = async () => {
@@ -22,7 +28,7 @@ const MergePDF = () => {
     }
 
     setLoading(true);
-    setMessage({ type: "info", text: "Merging PDFs... Please wait." });
+    setMessage(null);
 
     const formData = new FormData();
     files.forEach((file) => formData.append("files", file));
@@ -31,120 +37,135 @@ const MergePDF = () => {
       const response = await mergePDFs(formData);
       const blob = new Blob([response.data], { type: "application/pdf" });
       setMergedFile(URL.createObjectURL(blob));
-      setMessage({ type: "success", text: "PDFs merged successfully!" });
+      setMessage({ type: "success", text: "Merge Complete!" });
     } catch (error) {
       console.error("Merge error:", error);
-      setMessage({ type: "error", text: "Error merging PDFs. Please try again." });
+      setMessage({ type: "error", text: "Failed to merge. Try again." });
     }
 
     setLoading(false);
   };
 
   return (
-    <div className="flex h-screen bg-gradient-to-r from-purple-200 to-pink-200">
-      <Sidebar />
-
-      <motion.div
-        className="flex flex-1 justify-center items-center"
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-      >
-        <motion.div
-          className="p-6 w-full max-w-xl bg-white shadow-lg rounded-lg"
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
-        >
-          {/* Title */}
-          <motion.h2
-            className="text-2xl font-bold mb-4 text-center text-purple-600"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-          >
-            Merge PDFs
-          </motion.h2>
-
-          {/* Message Box */}
-          {message.text && (
-            <motion.div
-              className={`mb-4 p-3 rounded text-center ${
-                message.type === "success"
-                  ? "bg-green-100 text-green-700"
-                  : message.type === "error"
-                  ? "bg-red-100 text-red-700"
-                  : "bg-yellow-100 text-yellow-700"
-              }`}
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4 }}
-            >
-              {message.text}
-            </motion.div>
-          )}
-
-          {/* File Upload */}
-          <div className="mb-4">
+    <ToolLayout
+      title="Merge PDFs"
+      description="Combine multiple PDF documents into a single, organized file. Perfect for reports, invoices, and archiving."
+      theme="purple" // 👈 This sets the Purple/Creative theme
+    >
+      <div className="h-full flex flex-col">
+        
+        {/* 1. Modern Upload Area (The "Drop Zone") */}
+        {!mergedFile && (
+          <div className="mb-6">
             <input
               type="file"
               accept="application/pdf"
               multiple
               onChange={handleFileChange}
-              className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-purple-500 file:text-white hover:file:bg-purple-700 cursor-pointer"
+              id="file-upload"
+              className="hidden"
             />
+            <label
+              htmlFor="file-upload"
+              className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-purple-500/50 rounded-2xl bg-purple-500/10 hover:bg-purple-500/20 transition-all cursor-pointer group"
+            >
+              <div className="p-4 rounded-full bg-purple-500/20 group-hover:scale-110 transition-transform">
+                <UploadCloud className="w-8 h-8 text-purple-300" />
+              </div>
+              <p className="mt-3 text-sm font-medium text-gray-300">
+                Click to upload or drag files here
+              </p>
+            </label>
           </div>
+        )}
 
-          {/* Selected Files List */}
-          {files.length > 0 && (
-            <motion.div
-              className="mb-4 p-3 bg-purple-100 rounded"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5 }}
-            >
-              <h3 className="text-lg font-semibold text-purple-700">Selected Files:</h3>
-              <ul className="list-disc pl-5 text-gray-800">
-                {files.map((file, index) => (
-                  <motion.li key={index} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: index * 0.1 }}>
-                    {file.name}
-                  </motion.li>
-                ))}
-              </ul>
-            </motion.div>
-          )}
-
-          {/* Merge Button */}
-          <motion.button
-            className="w-full bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 transition disabled:bg-gray-400"
-            onClick={handleMerge}
-            disabled={loading}
-            whileHover={{ scale: 1.05 }}
-          >
-            {loading ? "Merging..." : "Merge PDFs"}
-          </motion.button>
-
-          {/* Download Button */}
-          {mergedFile && (
-            <motion.div
-              className="mt-4 p-3 bg-green-100 rounded text-center"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5 }}
-            >
-              <p className="text-green-700 font-semibold">Merged PDF is ready:</p>
-              <motion.button
-                onClick={() => window.open(mergedFile, "_blank")}
-                className="mt-2 bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 transition"
-                whileHover={{ scale: 1.05 }}
+        {/* 2. File List (Floating Cards) */}
+        <div className="flex-1 overflow-y-auto mb-6 pr-2">
+           <AnimatePresence>
+            {files.map((file, index) => (
+              <motion.div
+                key={`${file.name}-${index}`}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                className="flex items-center justify-between p-3 mb-3 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-colors"
               >
-                Download Merged PDF
-              </motion.button>
+                <div className="flex items-center gap-3 overflow-hidden">
+                  <div className="p-2 bg-red-500/20 rounded-lg text-red-400">
+                    <File size={18} />
+                  </div>
+                  <span className="text-sm truncate text-gray-200">{file.name}</span>
+                </div>
+                <button
+                  onClick={() => removeFile(index)}
+                  className="p-1 hover:bg-red-500/20 text-gray-400 hover:text-red-400 rounded-lg transition"
+                >
+                  <X size={16} />
+                </button>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+          
+          {files.length === 0 && !mergedFile && (
+            <div className="text-center text-gray-500 mt-10 italic">
+              No files selected yet...
+            </div>
+          )}
+        </div>
+
+        {/* 3. Action Area (Bottom Sticky) */}
+        <div className="mt-auto">
+          {message && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className={`p-3 mb-4 rounded-xl flex items-center justify-center gap-2 text-sm font-medium ${
+                message.type === "success" 
+                  ? "bg-green-500/20 text-green-300 border border-green-500/30" 
+                  : "bg-red-500/20 text-red-300 border border-red-500/30"
+              }`}
+            >
+              {message.type === "success" ? <CheckCircle size={16} /> : <AlertCircle size={16} />}
+              {message.text}
             </motion.div>
           )}
-        </motion.div>
-      </motion.div>
-    </div>
+
+          {!mergedFile ? (
+            <button
+              onClick={handleMerge}
+              disabled={loading || files.length < 2}
+              className={`w-full py-4 rounded-xl font-bold shadow-lg flex items-center justify-center gap-2 transition-all transform hover:scale-[1.02] active:scale-[0.98]
+                ${loading || files.length < 2
+                  ? "bg-gray-700 text-gray-400 cursor-not-allowed"
+                  : "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white"
+                }`}
+            >
+              {loading ? (
+                <span className="animate-pulse">Merging Process...</span>
+              ) : (
+                <>Merge Files <ArrowRight size={18} /></>
+              )}
+            </button>
+          ) : (
+            <div className="grid grid-cols-2 gap-4">
+              <button
+                onClick={() => { setMergedFile(null); setFiles([]); }}
+                className="py-3 rounded-xl font-medium bg-gray-700 text-white hover:bg-gray-600 transition"
+              >
+                Start Over
+              </button>
+              <button
+                onClick={() => window.open(mergedFile, "_blank")}
+                className="py-3 rounded-xl font-bold bg-green-600 hover:bg-green-500 text-white shadow-lg shadow-green-500/20 transition transform hover:scale-[1.02]"
+              >
+                Download PDF
+              </button>
+            </div>
+          )}
+        </div>
+
+      </div>
+    </ToolLayout>
   );
 };
 
