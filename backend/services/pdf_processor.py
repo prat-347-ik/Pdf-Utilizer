@@ -12,6 +12,9 @@ from translate_utils import translate_pdf, translate_text_content
 # Import the new tts function
 from tts_utils import text_to_speech
 
+# Import RAG functions
+from rag_utils import ingest_pdf, ask_pdf
+
 
 
 # Import functions from your provided utils file
@@ -99,7 +102,7 @@ def main():
             if "error" in result: raise Exception(result['error'])
             send_response(True, data={"filePath": result['output_file']})
 
-# --- 10. TRANSLATE ---
+        # --- 10. TRANSLATE ---
         elif operation == "translate":
             # Payload: { "file": "...", "output": "...", "lang": "es" }
             result = translate_pdf(
@@ -128,6 +131,20 @@ def main():
             text_to_speech(final_text, payload['output'], target_lang)
             
             send_response(True, data={"filePath": payload['output']}) 
+
+        # --- 11. RAG INGEST (Start Chat) ---
+        elif operation == "rag_ingest":
+            # Payload: { "file": "...", "index_id": "..." }
+            result = ingest_pdf(payload['file'], payload['index_id'])
+            if "error" in result: raise Exception(result['error'])
+            send_response(True, data=result)
+
+        # --- 12. RAG QUERY (Ask Question) ---
+        elif operation == "rag_query":
+            # Payload: { "query": "...", "index_id": "..." }
+            result = ask_pdf(payload['query'], payload['index_id'])
+            if "error" in result: raise Exception(result['error'])
+            send_response(True, data=result)    
 
         else:
             raise Exception(f"Unknown operation: {operation}")

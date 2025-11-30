@@ -10,6 +10,8 @@ import pdfRoutes from './src/routes/pdfRoutes.js';
 import translateRoutes from './src/routes/translateRoutes.js'; // Add this
 //import sttRoutes from './src/routes/sttRoutes.js'; // Add this
 import ttsRoutes from './src/routes/ttsRoutes.js'; // Add this
+//PDF Chat RAG
+import chatRoutes from './src/routes/chatRoutes.js';
 
 dotenv.config();
 
@@ -28,6 +30,7 @@ app.use('/pdf', pdfRoutes);
 app.use('/api', translateRoutes);
 app.use('/tts', ttsRoutes); // Add this
 //app.use('/stt', sttRoutes); // Add this
+app.use('/api/chat', chatRoutes); // PDF Chat RAG
 
 app.get('/', (req, res) => {
   res.send('PDF Utilizer Backend is Running!');

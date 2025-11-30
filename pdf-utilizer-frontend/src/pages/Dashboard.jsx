@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { 
   Search, FilePlus, Scissors, FileText, Image, PenTool, 
   Shield, RotateCw, Volume2, Mic, Languages, FileArchive, 
-  Sparkles, Sun, Moon
+  Sparkles, Sun, Moon ,Bot
 } from "lucide-react";
 
 // Tools config remains the same
@@ -19,6 +19,7 @@ const tools = [
   { id: 8, name: "Rotate PDF", path: "/rotate", description: "Fix orientation.", icon: <RotateCw size={28} />, color: "bg-cyan-500", span: "col-span-1 row-span-1" },
   { id: 9, name: "Audiobook", path: "/audiobook", description: "Listen to PDFs.", icon: <Volume2 size={28} />, color: "bg-yellow-500", span: "col-span-1 row-span-1" },
   { id: 10, name: "Translate", path: "/translate", description: "Translate content.", icon: <Languages size={28} />, color: "bg-red-500", span: "col-span-1 row-span-1" },
+  { id: 11, name: "Chat with PDF", path: "/chat",description: "Ask questions to your AI assistant.", icon: <Bot size={32} />, color: "bg-gradient-to-br from-indigo-600 to-violet-600"},
 ];
 
 export default function Dashboard() {
