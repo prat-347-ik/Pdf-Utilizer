@@ -1,0 +1,118 @@
+[2025-11-30 11:17:38] --- Starting PDF Translation: D:\Project_Repos\Pdf-Utilizer\backend\uploads\1764481657573-847021916.pdf ---
+[2025-11-30 11:17:38] Initializing Translator for target: ja
+
+[2025-11-30 11:17:38] ❌ CRITICAL Translation Setup Error: ja
+ --> No support for the provided language.
+Please select on of the supported languages:
+{'afrikaans': 'af', 'albanian': 'sq', 'amharic': 'am', 'arabic': 'ar', 'armenian': 'hy', 'assamese': 'as', 'aymara': 'ay', 'azerbaijani': 'az', 'bambara': 'bm', 'basque': 'eu', 'belarusian': 'be', 'bengali': 'bn', 'bhojpuri': 'bho', 'bosnian': 'bs', 'bulgarian': 'bg', 'catalan': 'ca', 'cebuano': 'ceb', 'chichewa': 'ny', 'chinese (simplified)': 'zh-CN', 'chinese (traditional)': 'zh-TW', 'corsican': 'co', 'croatian': 'hr', 'czech': 'cs', 'danish': 'da', 'dhivehi': 'dv', 'dogri': 'doi', 'dutch': 'nl', 'english': 'en', 'esperanto': 'eo', 'estonian': 'et', 'ewe': 'ee', 'filipino': 'tl', 'finnish': 'fi', 'french': 'fr', 'frisian': 'fy', 'galician': 'gl', 'georgian': 'ka', 'german': 'de', 'greek': 'el', 'guarani': 'gn', 'gujarati': 'gu', 'haitian creole': 'ht', 'hausa': 'ha', 'hawaiian': 'haw', 'hebrew': 'iw', 'hindi': 'hi', 'hmong': 'hmn', 'hungarian': 'hu', 'icelandic': 'is', 'igbo': 'ig', 'ilocano': 'ilo', 'indonesian': 'id', 'irish': 'ga', 'italian': 'it', 'japanese': 'ja', 'javanese': 'jw', 'kannada': 'kn', 'kazakh': 'kk', 'khmer': 'km', 'kinyarwanda': 'rw', 'konkani': 'gom', 'korean': 'ko', 'krio': 'kri', 'kurdish (kurmanji)': 'ku', 'kurdish (sorani)': 'ckb', 'kyrgyz': 'ky', 'lao': 'lo', 'latin': 'la', 'latvian': 'lv', 'lingala': 'ln', 'lithuanian': 'lt', 'luganda': 'lg', 'luxembourgish': 'lb', 'macedonian': 'mk', 'maithili': 'mai', 'malagasy': 'mg', 'malay': 'ms', 'malayalam': 'ml', 'maltese': 'mt', 'maori': 'mi', 'marathi': 'mr', 'meiteilon (manipuri)': 'mni-Mtei', 'mizo': 'lus', 'mongolian': 'mn', 'myanmar': 'my', 'nepali': 'ne', 'norwegian': 'no', 'odia (oriya)': 'or', 'oromo': 'om', 'pashto': 'ps', 'persian': 'fa', 'polish': 'pl', 'portuguese': 'pt', 'punjabi': 'pa', 'quechua': 'qu', 'romanian': 'ro', 'russian': 'ru', 'samoan': 'sm', 'sanskrit': 'sa', 'scots gaelic': 'gd', 'sepedi': 'nso', 'serbian': 'sr', 'sesotho': 'st', 'shona': 'sn', 'sindhi': 'sd', 'sinhala': 'si', 'slovak': 'sk', 'slovenian': 'sl', 'somali': 'so', 'spanish': 'es', 'sundanese': 'su', 'swahili': 'sw', 'swedish': 'sv', 'tajik': 'tg', 'tamil': 'ta', 'tatar': 'tt', 'telugu': 'te', 'thai': 'th', 'tigrinya': 'ti', 'tsonga': 'ts', 'turkish': 'tr', 'turkmen': 'tk', 'twi': 'ak', 'ukrainian': 'uk', 'urdu': 'ur', 'uyghur': 'ug', 'uzbek': 'uz', 'vietnamese': 'vi', 'welsh': 'cy', 'xhosa': 'xh', 'yiddish': 'yi', 'yoruba': 'yo', 'zulu': 'zu'}
+[2025-11-30 11:17:39] Success: PDF Generated
+[2025-11-30 11:19:28] --- Starting PDF Translation: D:\Project_Repos\Pdf-Utilizer\backend\uploads\1764481767075-652521479.pdf ---
+[2025-11-30 11:19:28] Initializing Translator for target: ja
+[2025-11-30 11:19:28] Text split into 1 chunks.
+[2025-11-30 11:19:30] Success: PDF Generated
+[2025-11-30 11:19:39] --- Starting PDF Translation: D:\Project_Repos\Pdf-Utilizer\backend\uploads\1764481778682-20927725.pdf ---
+[2025-11-30 11:19:39] Initializing Translator for target: kr
+[2025-11-30 11:19:39] ❌ CRITICAL Translation Setup Error: kr --> No support for the provided language.
+Please select on of the supported languages:
+{'afrikaans': 'af', 'albanian': 'sq', 'amharic': 'am', 'arabic': 'ar', 'armenian': 'hy', 'assamese': 'as', 'aymara': 'ay', 'azerbaijani': 'az', 'bambara': 'bm', 'basque': 'eu', 'belarusian': 'be', 'bengali': 'bn', 'bhojpuri': 'bho', 'bosnian': 'bs', 'bulgarian': 'bg', 'catalan': 'ca', 'cebuano': 'ceb', 'chichewa': 'ny', 'chinese (simplified)': 'zh-CN', 'chinese (traditional)': 'zh-TW', 'corsican': 'co', 'croatian': 'hr', 'czech': 'cs', 'danish': 'da', 'dhivehi': 'dv', 'dogri': 'doi', 'dutch': 'nl', 'english': 'en', 'esperanto': 'eo', 'estonian': 'et', 'ewe': 'ee', 'filipino': 'tl', 'finnish': 'fi', 'french': 'fr', 'frisian': 'fy', 'galician': 'gl', 'georgian': 'ka', 'german': 'de', 'greek': 'el', 'guarani': 'gn', 'gujarati': 'gu', 'haitian creole': 'ht', 'hausa': 'ha', 'hawaiian': 'haw', 'hebrew': 'iw', 'hindi': 'hi', 'hmong': 'hmn', 'hungarian': 'hu', 'icelandic': 'is', 'igbo': 'ig', 'ilocano': 'ilo', 'indonesian': 'id', 'irish': 'ga', 'italian': 'it', 'japanese': 'ja', 'javanese': 'jw', 'kannada': 'kn', 'kazakh': 'kk', 'khmer': 'km', 'kinyarwanda': 'rw', 'konkani': 'gom', 'korean': 'ko', 'krio': 'kri', 'kurdish (kurmanji)': 'ku', 'kurdish (sorani)': 'ckb', 'kyrgyz': 'ky', 'lao': 'lo', 'latin': 'la', 'latvian': 'lv', 'lingala': 'ln', 'lithuanian': 'lt', 'luganda': 'lg', 'luxembourgish': 'lb', 'macedonian': 'mk', 'maithili': 'mai', 'malagasy': 'mg', 'malay': 'ms', 'malayalam': 'ml', 'maltese': 'mt', 'maori': 'mi', 'marathi': 'mr', 'meiteilon (manipuri)': 'mni-Mtei', 'mizo': 'lus', 'mongolian': 'mn', 'myanmar': 'my', 'nepali': 'ne', 'norwegian': 'no', 'odia (oriya)': 'or', 'oromo': 'om', 'pashto': 'ps', 'persian': 'fa', 'polish': 'pl', 'portuguese': 'pt', 'punjabi': 'pa', 'quechua': 'qu', 'romanian': 'ro', 'russian': 'ru', 'samoan': 'sm', 'sanskrit': 'sa', 'scots gaelic': 'gd', 'sepedi': 'nso', 'serbian': 'sr', 'sesotho': 'st', 'shona': 'sn', 'sindhi': 'sd', 'sinhala': 'si', 'slovak': 'sk', 'slovenian': 'sl', 'somali': 'so', 'spanish': 'es', 'sundanese': 'su', 'swahili': 'sw', 'swedish': 'sv', 'tajik': 'tg', 'tamil': 'ta', 'tatar': 'tt', 'telugu': 'te', 'thai': 'th', 'tigrinya': 'ti', 'tsonga': 'ts', 'turkish': 'tr', 'turkmen': 'tk', 'twi': 'ak', 'ukrainian': 'uk', 'urdu': 'ur', 'uyghur': 'ug', 'uzbek': 'uz', 'vietnamese': 'vi', 'welsh': 'cy', 'xhosa': 'xh', 'yiddish': 'yi', 'yoruba': 'yo', 'zulu': 'zu'}
+[2025-11-30 11:19:40] Success: PDF Generated
+[2025-11-30 11:19:54] --- Starting PDF Translation: D:\Project_Repos\Pdf-Utilizer\backend\uploads\1764481792938-917459045.pdf ---
+[2025-11-30 11:19:54] Initializing Translator for target: am
+[2025-11-30 11:19:54] Text split into 1 chunks.
+[2025-11-30 11:19:57] Success: PDF Generated
+[2025-11-30 11:20:08] --- Starting PDF Translation: D:\Project_Repos\Pdf-Utilizer\backend\uploads\1764481806727-769047042.pdf ---
+[2025-11-30 11:20:08] Initializing Translator for target: fr
+[2025-11-30 11:20:08] Text split into 1 chunks.
+[2025-11-30 11:20:11] Success: PDF Generated
+[2025-11-30 11:20:22] --- Starting PDF Translation: D:\Project_Repos\Pdf-Utilizer\backend\uploads\1764481820372-43800252.pdf ---
+[2025-11-30 11:20:22] Initializing Translator for target: hi
+[2025-11-30 11:20:22] Text split into 1 chunks.
+[2025-11-30 11:20:26] Success: PDF Generated
+[2025-11-30 11:20:43] --- Starting PDF Translation: D:\Project_Repos\Pdf-Utilizer\backend\uploads\1764481841234-258796043.pdf ---
+[2025-11-30 11:20:43] Initializing Translator for target: es
+[2025-11-30 11:20:43] Text split into 1 chunks.
+[2025-11-30 11:20:45] Success: PDF Generated
+[2025-11-30 11:20:52] --- Starting PDF Translation: D:\Project_Repos\Pdf-Utilizer\backend\uploads\1764481851488-78205271.pdf ---
+[2025-11-30 11:20:52] Initializing Translator for target: fr
+[2025-11-30 11:20:52] Text split into 1 chunks.
+[2025-11-30 11:20:55] Success: PDF Generated
+[2025-11-30 11:21:02] --- Starting PDF Translation: D:\Project_Repos\Pdf-Utilizer\backend\uploads\1764481861074-130349215.pdf ---
+[2025-11-30 11:21:02] Initializing Translator for target: de
+[2025-11-30 11:21:02] Text split into 1 chunks.
+[2025-11-30 11:21:05] Success: PDF Generated
+[2025-11-30 11:21:14] --- Starting PDF Translation: D:\Project_Repos\Pdf-Utilizer\backend\uploads\1764481873352-981888271.pdf ---
+[2025-11-30 11:21:14] Initializing Translator for target: zh-CN
+[2025-11-30 11:21:14] Text split into 1 chunks.
+[2025-11-30 11:21:17] Success: PDF Generated
+[2025-11-30 11:21:24] --- Starting PDF Translation: D:\Project_Repos\Pdf-Utilizer\backend\uploads\1764481883099-647854507.pdf ---
+[2025-11-30 11:21:24] Initializing Translator for target: ja
+[2025-11-30 11:21:24] Text split into 1 chunks.
+[2025-11-30 11:21:26] Success: PDF Generated
+[2025-11-30 11:21:34] --- Starting PDF Translation: D:\Project_Repos\Pdf-Utilizer\backend\uploads\1764481893653-51092544.pdf ---
+[2025-11-30 11:21:34] Initializing Translator for target: ko
+[2025-11-30 11:21:34] Text split into 1 chunks.
+[2025-11-30 11:21:36] Success: PDF Generated
+[2025-11-30 11:21:43] --- Starting PDF Translation: D:\Project_Repos\Pdf-Utilizer\backend\uploads\1764481902493-465722069.pdf ---
+[2025-11-30 11:21:43] Initializing Translator for target: it
+[2025-11-30 11:21:43] Text split into 1 chunks.
+[2025-11-30 11:21:47] Success: PDF Generated
+[2025-11-30 11:21:56] --- Starting PDF Translation: D:\Project_Repos\Pdf-Utilizer\backend\uploads\1764481914928-387597215.pdf ---
+[2025-11-30 11:21:56] Initializing Translator for target: pt
+[2025-11-30 11:21:56] Text split into 1 chunks.
+[2025-11-30 11:21:59] Success: PDF Generated
+[2025-11-30 11:22:07] --- Starting PDF Translation: D:\Project_Repos\Pdf-Utilizer\backend\uploads\1764481925904-549212527.pdf ---
+[2025-11-30 11:22:07] Initializing Translator for target: ar
+[2025-11-30 11:22:07] Text split into 1 chunks.
+[2025-11-30 11:22:10] Success: PDF Generated
+[2025-11-30 11:22:41] --- Starting PDF Translation: D:\Project_Repos\Pdf-Utilizer\backend\uploads\1764481960065-799796002.pdf ---
+[2025-11-30 11:22:41] Initializing Translator for target: mr
+[2025-11-30 11:22:41] Text split into 1 chunks.
+[2025-11-30 11:22:43] Success: PDF Generated
+[2025-11-30 12:09:48] Initializing Translator for target: de
+[2025-11-30 12:09:48] Text split into 1 chunks.
+[2025-11-30 12:10:26] Initializing Translator for target: hi
+[2025-11-30 12:10:26] Text split into 1 chunks.
+[2025-11-30 12:10:50] Initializing Translator for target: ja
+[2025-11-30 12:10:50] Text split into 1 chunks.
+[2025-11-30 12:13:29] --- Starting PDF Translation: D:\Project_Repos\Pdf-Utilizer\backend\uploads\1764485007785-779667062.pdf ---
+[2025-11-30 12:13:29] Initializing Translator for target: vi
+[2025-11-30 12:13:29] Text split into 1 chunks.
+[2025-11-30 12:13:31] Success: PDF Generated
+[2025-11-30 12:23:22] --- Starting PDF Translation: D:\Project_Repos\Pdf-Utilizer\backend\uploads\1764485600270-66964979.pdf ---
+[2025-11-30 12:23:22] Initializing Translator for target: gu
+[2025-11-30 12:23:22] Text split into 1 chunks.
+[2025-11-30 12:23:24] Success: PDF Generated
+[2025-11-30 12:23:45] --- Starting PDF Translation: D:\Project_Repos\Pdf-Utilizer\backend\uploads\1764485623315-821176028.pdf ---
+[2025-11-30 12:23:45] Initializing Translator for target: gu
+[2025-11-30 12:23:45] Text split into 1 chunks.
+[2025-11-30 12:23:47] Success: PDF Generated
+[2025-11-30 12:23:56] --- Starting PDF Translation: D:\Project_Repos\Pdf-Utilizer\backend\uploads\1764485635255-708521998.pdf ---
+[2025-11-30 12:23:56] Initializing Translator for target: bn
+[2025-11-30 12:23:56] Text split into 1 chunks.
+[2025-11-30 12:23:59] Success: PDF Generated
+[2025-11-30 12:24:08] --- Starting PDF Translation: D:\Project_Repos\Pdf-Utilizer\backend\uploads\1764485647419-721106633.pdf ---
+[2025-11-30 12:24:08] Initializing Translator for target: th
+[2025-11-30 12:24:08] Text split into 1 chunks.
+[2025-11-30 12:24:11] Success: PDF Generated
+[2025-11-30 12:24:18] --- Starting PDF Translation: D:\Project_Repos\Pdf-Utilizer\backend\uploads\1764485656978-829242450.pdf ---
+[2025-11-30 12:24:18] Initializing Translator for target: ta
+[2025-11-30 12:24:18] Text split into 1 chunks.
+[2025-11-30 12:24:20] Success: PDF Generated
+[2025-11-30 12:24:28] --- Starting PDF Translation: D:\Project_Repos\Pdf-Utilizer\backend\uploads\1764485667221-292687792.pdf ---
+[2025-11-30 12:24:28] Initializing Translator for target: kn
+[2025-11-30 12:24:28] Text split into 1 chunks.
+[2025-11-30 12:24:30] Success: PDF Generated
+[2025-11-30 12:24:38] --- Starting PDF Translation: D:\Project_Repos\Pdf-Utilizer\backend\uploads\1764485677160-452173940.pdf ---
+[2025-11-30 12:24:38] Initializing Translator for target: tu
+[2025-11-30 12:24:38] ❌ CRITICAL Translation Setup Error: tu --> No support for the provided language.
+Please select on of the supported languages:
+{'afrikaans': 'af', 'albanian': 'sq', 'amharic': 'am', 'arabic': 'ar', 'armenian': 'hy', 'assamese': 'as', 'aymara': 'ay', 'azerbaijani': 'az', 'bambara': 'bm', 'basque': 'eu', 'belarusian': 'be', 'bengali': 'bn', 'bhojpuri': 'bho', 'bosnian': 'bs', 'bulgarian': 'bg', 'catalan': 'ca', 'cebuano': 'ceb', 'chichewa': 'ny', 'chinese (simplified)': 'zh-CN', 'chinese (traditional)': 'zh-TW', 'corsican': 'co', 'croatian': 'hr', 'czech': 'cs', 'danish': 'da', 'dhivehi': 'dv', 'dogri': 'doi', 'dutch': 'nl', 'english': 'en', 'esperanto': 'eo', 'estonian': 'et', 'ewe': 'ee', 'filipino': 'tl', 'finnish': 'fi', 'french': 'fr', 'frisian': 'fy', 'galician': 'gl', 'georgian': 'ka', 'german': 'de', 'greek': 'el', 'guarani': 'gn', 'gujarati': 'gu', 'haitian creole': 'ht', 'hausa': 'ha', 'hawaiian': 'haw', 'hebrew': 'iw', 'hindi': 'hi', 'hmong': 'hmn', 'hungarian': 'hu', 'icelandic': 'is', 'igbo': 'ig', 'ilocano': 'ilo', 'indonesian': 'id', 'irish': 'ga', 'italian': 'it', 'japanese': 'ja', 'javanese': 'jw', 'kannada': 'kn', 'kazakh': 'kk', 'khmer': 'km', 'kinyarwanda': 'rw', 'konkani': 'gom', 'korean': 'ko', 'krio': 'kri', 'kurdish (kurmanji)': 'ku', 'kurdish (sorani)': 'ckb', 'kyrgyz': 'ky', 'lao': 'lo', 'latin': 'la', 'latvian': 'lv', 'lingala': 'ln', 'lithuanian': 'lt', 'luganda': 'lg', 'luxembourgish': 'lb', 'macedonian': 'mk', 'maithili': 'mai', 'malagasy': 'mg', 'malay': 'ms', 'malayalam': 'ml', 'maltese': 'mt', 'maori': 'mi', 'marathi': 'mr', 'meiteilon (manipuri)': 'mni-Mtei', 'mizo': 'lus', 'mongolian': 'mn', 'myanmar': 'my', 'nepali': 'ne', 'norwegian': 'no', 'odia (oriya)': 'or', 'oromo': 'om', 'pashto': 'ps', 'persian': 'fa', 'polish': 'pl', 'portuguese': 'pt', 'punjabi': 'pa', 'quechua': 'qu', 'romanian': 'ro', 'russian': 'ru', 'samoan': 'sm', 'sanskrit': 'sa', 'scots gaelic': 'gd', 'sepedi': 'nso', 'serbian': 'sr', 'sesotho': 'st', 'shona': 'sn', 'sindhi': 'sd', 'sinhala': 'si', 'slovak': 'sk', 'slovenian': 'sl', 'somali': 'so', 'spanish': 'es', 'sundanese': 'su', 'swahili': 'sw', 'swedish': 'sv', 'tajik': 'tg', 'tamil': 'ta', 'tatar': 'tt', 'telugu': 'te', 'thai': 'th', 'tigrinya': 'ti', 'tsonga': 'ts', 'turkish': 'tr', 'turkmen': 'tk', 'twi': 'ak', 'ukrainian': 'uk', 'urdu': 'ur', 'uyghur': 'ug', 'uzbek': 'uz', 'vietnamese': 'vi', 'welsh': 'cy', 'xhosa': 'xh', 'yiddish': 'yi', 'yoruba': 'yo', 'zulu': 'zu'}
+[2025-11-30 12:24:39] Success: PDF Generated
+[2025-11-30 12:24:48] --- Starting PDF Translation: D:\Project_Repos\Pdf-Utilizer\backend\uploads\1764485687094-237460139.pdf ---
+[2025-11-30 12:24:48] Initializing Translator for target: te
+[2025-11-30 12:24:48] Text split into 1 chunks.
+[2025-11-30 12:24:50] Success: PDF Generated
+[2025-11-30 12:26:18] --- Starting PDF Translation: D:\Project_Repos\Pdf-Utilizer\backend\uploads\1764485777068-149443914.pdf ---
+[2025-11-30 12:26:18] Initializing Translator for target: kn
+[2025-11-30 12:26:18] Text split into 1 chunks.
+[2025-11-30 12:26:20] Success: PDF Generated

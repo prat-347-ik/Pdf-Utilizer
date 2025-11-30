@@ -12,16 +12,41 @@ const Translate = () => {
   const [message, setMessage] = useState({ type: "", text: "" });
 
   const languages = [
+    { code: "en", name: "English (US)" },
+    
+    // Western Europe
     { code: "es", name: "Spanish (Español)" },
     { code: "fr", name: "French (Français)" },
     { code: "de", name: "German (Deutsch)" },
+    { code: "it", name: "Italian (Italiano)" },
+    { code: "pt", name: "Portuguese (Português)" },
+    { code: "nl", name: "Dutch (Nederlands)" },
+    
+    // Northern/Eastern Europe
+    { code: "sv", name: "Swedish (Svenska)" },
+    { code: "pl", name: "Polish (Polski)" },
+    { code: "tr", name: "Turkish (Türkçe)" },
+    { code: "el", name: "Greek (Ελληνικά)" },
+    { code: "ru", name: "Russian (Русский)" },
+    { code: "uk", name: "Ukrainian (Українська)" },
+    
+    // Asian / Indic
     { code: "hi", name: "Hindi (हिन्दी)" },
+    { code: "mr", name: "Marathi (मराठी)" },
+    { code: "bn", name: "Bengali (বাংলা)" },
+    { code: "ta", name: "Tamil (தமிழ்)" },
+    { code: "te", name: "Telugu (తెలుగు)" },
+    { code: "th", name: "Thai (ไทย)" },
+    { code: "kn", name: "Kannada (ಕನ್ನಡ)" },
+    { code: "gu", name: "Gujarati (ગુજરાતી)" },
+    { code: "ne", name: "Nepali (नेपाली)" },
     { code: "zh-CN", name: "Chinese Simplified (简体中文)" },
     { code: "ja", name: "Japanese (日本語)" },
     { code: "ko", name: "Korean (한국어)" },
-    { code: "ru", name: "Russian (Русский)" },
-    { code: "it", name: "Italian (Italiano)" },
-    { code: "pt", name: "Portuguese (Português)" },
+    
+    // Southeast Asia & Middle East
+    { code: "id", name: "Indonesian (Bahasa)" },
+    { code: "vi", name: "Vietnamese (Tiếng Việt)" },
     { code: "ar", name: "Arabic (العربية)" }
   ];
 
@@ -80,8 +105,7 @@ const Translate = () => {
         <div className="flex flex-col items-center justify-start min-h-full pb-20">
           
           <motion.div 
-            // ✅ FIX: Removed 'overflow-hidden' from here.
-            // This ensures the card grows as tall as needed without clipping children.
+            // Removed 'overflow-hidden' from here so content isn't clipped
             className="w-full max-w-2xl bg-white rounded-3xl shadow-xl border border-indigo-100 my-4"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -206,6 +230,9 @@ const Translate = () => {
               </div>
             </div>
           </motion.div>
+          
+          {/* Spacer to ensure bottom scrolling */}
+          <div className="h-10 w-full flex-shrink-0"></div>
         </div>
       </main>
     </div>

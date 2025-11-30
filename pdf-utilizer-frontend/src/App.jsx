@@ -14,6 +14,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Compress from "./pages/Compress";
 import SmartSign from "./pages/SmartSign";
+import Audiobook from "./pages/Audiobook";    
 import LandingPage from "./pages/LandingPage";
 import Navbar from "./components/Navbar";
 import "react-toastify/dist/ReactToastify.css";
@@ -44,6 +45,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/smart-sign" element={<SmartSign />} />
+            <Route path="/audiobook" element={<Audiobook />} />
           </Routes>
         </div>
       </div>

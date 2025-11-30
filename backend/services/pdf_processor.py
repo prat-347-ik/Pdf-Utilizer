@@ -1,10 +1,18 @@
 import sys
+import io
 import json
 import os
 
-
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 #  Import the translate function
-from translate_utils import translate_pdf
+
+from translate_utils import translate_pdf, translate_text_content
+
+# Import the new tts function
+from tts_utils import text_to_speech
+
+
 
 # Import functions from your provided utils file
 from pdf_utils import (
@@ -101,6 +109,25 @@ def main():
             )
             if "error" in result: raise Exception(result['error'])
             send_response(True, data={"filePath": result['output_path']})
+
+        elif operation == "tts":
+            # 1. Extract Text
+            text_content = extract_text_from_pdf(payload['file'])
+            if not text_content or text_content.strip() == "":
+                raise Exception("Could not extract text from this PDF.")
+            
+            # 2. Get Target Language
+            target_lang = payload.get('lang', 'en')
+
+            # 3. ✅ TRANSLATE TEXT (The Fix)
+            # This converts "Hello" -> "नमस्ते" if lang is 'hi'
+            # If lang is 'en', it just cleans up the English text
+            final_text = translate_text_content(text_content, target_lang)
+            
+            # 4. Convert to Audio
+            text_to_speech(final_text, payload['output'], target_lang)
+            
+            send_response(True, data={"filePath": payload['output']}) 
 
         else:
             raise Exception(f"Unknown operation: {operation}")

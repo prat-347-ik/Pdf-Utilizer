@@ -20,6 +20,7 @@ const Sidebar = () => {
     { name: "Text to Speech", path: "/text-to-speech", icon: <Volume2 size={20} /> },
     { name: "Speech to Text", path: "/speech-to-text", icon: <Mic size={20} /> },
     { name: "Translate PDF", path: "/translate", icon: <Languages size={20} /> },
+    { name: "Audiobook Creator", path: "/audiobook", icon: <Volume2 size={20} /> },
   ];
 
   return (

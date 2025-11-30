@@ -1,90 +1,132 @@
 import fitz  # PyMuPDF
 from deep_translator import GoogleTranslator
 from fpdf import FPDF
+import fpdf
 import os
 import pathlib
+import datetime
 
-def translate_pdf(input_path, output_path, target_lang='es'):
+# ✅ DEBUG LOGGER
+def log_debug(message):
+    with open("translation_debug.log", "a", encoding="utf-8") as f:
+        timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        f.write(f"[{timestamp}] {message}\n")
+
+def translate_text_content(text, target_lang):
+    if not text or not text.strip(): 
+        log_debug("Skipping: Empty text input")
+        return ""
+    
+    if target_lang == 'en': 
+        return text
+
     try:
-        # 1. Initialize Translator
+        log_debug(f"Initializing Translator for target: {target_lang}")
         translator = GoogleTranslator(source='auto', target=target_lang)
         
-        doc = fitz.open(input_path)
-        full_text = ""
-        for page in doc:
-            full_text += page.get_text() + "\n\n"
-        
-        if not full_text.strip():
-            return {"error": "No text found in PDF."}
-
-        # 2. Translate (Chunking logic)
         chunks = []
         current_chunk = ""
-        for line in full_text.split('\n'):
-            if len(current_chunk) + len(line) < 4500:
+        # Chunking (Safe size ~3000 chars)
+        for line in text.split('\n'):
+            if len(current_chunk) + len(line) < 3000:
                 current_chunk += line + "\n"
             else:
                 chunks.append(current_chunk)
                 current_chunk = line + "\n"
-        if current_chunk:
-            chunks.append(current_chunk)
+        if current_chunk: chunks.append(current_chunk)
+
+        log_debug(f"Text split into {len(chunks)} chunks.")
 
         translated_text = ""
-        for chunk in chunks:
+        for i, chunk in enumerate(chunks):
             try:
-                translated_text += translator.translate(chunk) + "\n"
-            except Exception:
-                pass # Silently skip errors to avoid breaking JSON output
+                trans = translator.translate(chunk)
+                if trans:
+                    translated_text += trans + "\n"
+                else:
+                    log_debug(f"Chunk {i} returned None/Empty.")
+            except Exception as e:
+                log_debug(f"❌ Chunk {i} Failed: {str(e)}")
+                # Keep original text if translation fails, so we don't lose content
+                translated_text += chunk + "\n" 
+        
+        return translated_text
 
-        # 3. Create PDF
+    except Exception as e:
+        log_debug(f"❌ CRITICAL Translation Setup Error: {str(e)}")
+        return text 
+
+def translate_pdf(input_path, output_path, target_lang='es'):
+    try:
+        log_debug(f"--- Starting PDF Translation: {input_path} ---")
+        
+        # 1. Extract
+        doc = fitz.open(input_path)
+        full_text = ""
+        for page in doc: full_text += page.get_text() + "\n\n"
+        
+        if not full_text.strip(): 
+            log_debug("Error: No text found in PDF")
+            return {"error": "No text found in PDF."}
+
+        # 2. Translate
+        translated_text = translate_text_content(full_text, target_lang)
+
+        # 3. Generate PDF
         pdf = FPDF()
         pdf.add_page()
 
-        # Define paths
-        fonts_dir = pathlib.Path(__file__).parent.parent / "fonts"
+        # Resolve Font Paths
+        base_dir = pathlib.Path(__file__).resolve().parent.parent
+        fonts_dir = base_dir / "fonts"
         
         font_map = {
             "DejaVu": "DejaVuSans.ttf",
-            "Hindi": "NotoSansDevanagari-Regular.ttf",
+            "Hindi": "NotoSansDevanagari-Regular.ttf", 
             "Chinese": "NotoSansSC-Regular.ttf",
             "Japanese": "NotoSansJP-Regular.ttf",
-            "Korean": "NotoSansKR-Regular.ttf"
+            "Korean": "NotoSansKR-Regular.ttf",
+            "Gujarati": "NotoSansGujarati-Regular.ttf",
+            "Bengali": "NotoSansBengali-Regular.ttf",
+            "Tamil": "NotoSansTamil-Regular.ttf",
+            "Telugu": "NotoSansTelugu-Regular.ttf",
+            "Thai": "NotoSansThai-Regular.ttf",
+            "Kannada": "NotoSansKannada-Regular.ttf",
         }
 
-        # Enable Complex Text Shaping
-        try:
-            pdf.set_text_shaping(True) 
-        except Exception:
-            pass # Silent failure
-
-        # Register Main Font
-        main_font_path = fonts_dir / font_map["DejaVu"]
-        if main_font_path.exists():
-            pdf.add_font("DejaVu", style="", fname=str(main_font_path))
-            pdf.set_font("DejaVu", size=12)
-        else:
-            return {"error": f"Main font missing at {main_font_path}"}
-
-        # Register Fallback Fonts
-        available_fallbacks = []
-        for name, filename in font_map.items():
-            if name == "DejaVu": continue 
-            
+        def register_font(name, filename):
             f_path = fonts_dir / filename
-            if f_path.exists():
+            if not f_path.exists():
+                log_debug(f"Missing Font: {f_path}")
+                return False
+            try:
                 pdf.add_font(name, style="", fname=str(f_path))
-                available_fallbacks.append(name)
-                # print(f"Loaded fallback font: {name}")  <-- REMOVED THIS LINE
-        
-        if available_fallbacks:
-            pdf.set_fallback_fonts(available_fallbacks)
+                return True
+            except Exception as e:
+                log_debug(f"Font Load Error ({name}): {e}")
+                return False
 
-        # Write Text
-        pdf.multi_cell(0, 10, translated_text)
+        if not register_font("DejaVu", font_map["DejaVu"]):
+            return {"error": "Critical: Could not load DejaVuSans.ttf"}
         
+        pdf.set_font("DejaVu", size=12)
+
+        # Register Fallbacks
+        fallbacks = []
+        for name, filename in font_map.items():
+            if name == "DejaVu": continue
+            if register_font(name, filename):
+                fallbacks.append(name)
+        
+        if fallbacks:
+            pdf.set_fallback_fonts(fallbacks)
+
+        pdf.multi_cell(0, 10, translated_text)
         pdf.output(output_path)
-        return {"message": "Translation successful", "output_path": output_path}
+        
+        log_debug("Success: PDF Generated")
+        return {"message": "Success", "output_path": output_path}
 
     except Exception as e:
-        # print(f"Translation Error: {e}") <-- REMOVED THIS LINE
-        return {"error": f"Translation failed: {str(e)}"}
+        log_debug(f"Global Error: {str(e)}")
+        return {"error": f"General Error: {str(e)}"}
