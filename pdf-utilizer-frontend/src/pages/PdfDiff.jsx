@@ -20,6 +20,29 @@ const PdfDiff = () => {
   const [resultUrl, setResultUrl] = useState(null);
   const [error, setError] = useState(null);
 
+  // --- NEW: Drag & Drop Logic ---
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e, setFile) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const droppedFile = e.dataTransfer.files[0];
+      if (droppedFile.type === 'application/pdf') {
+        setFile(droppedFile);
+        setError(null);
+        setResultUrl(null); // Reset result on new upload
+      } else {
+        setError("Please select a valid PDF file.");
+      }
+    }
+  };
+  // -----------------------------
+
   // Helper to handle file selection
   const handleFileChange = (e, setFile) => {
     const selected = e.target.files[0];
@@ -86,6 +109,10 @@ const PdfDiff = () => {
                   />
                   <label
                     htmlFor="file-1-upload"
+                    // --- ADDED DRAG & DROP HANDLERS (File 1) ---
+                    onDragOver={handleDragOver}
+                    onDrop={(e) => handleDrop(e, setFile1)}
+                    // ------------------------------------------
                     className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-red-300 rounded-xl bg-red-50 hover:bg-red-100 transition-all cursor-pointer group"
                   >
                     <div className="p-3 rounded-full bg-white shadow-sm group-hover:scale-110 transition-transform">
@@ -146,6 +173,10 @@ const PdfDiff = () => {
                   />
                   <label
                     htmlFor="file-2-upload"
+                    // --- ADDED DRAG & DROP HANDLERS (File 2) ---
+                    onDragOver={handleDragOver}
+                    onDrop={(e) => handleDrop(e, setFile2)}
+                    // ------------------------------------------
                     className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-green-300 rounded-xl bg-green-50 hover:bg-green-100 transition-all cursor-pointer group"
                   >
                     <div className="p-3 rounded-full bg-white shadow-sm group-hover:scale-110 transition-transform">

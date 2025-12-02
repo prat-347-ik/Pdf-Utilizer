@@ -13,6 +13,29 @@ const ExtractImages = () => {
   const [message, setMessage] = useState(null);
   const [extractedFile, setExtractedFile] = useState(null);
 
+  // --- NEW: Drag & Drop Logic ---
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const droppedFile = e.dataTransfer.files[0];
+      if (droppedFile.type === "application/pdf") {
+        setFile(droppedFile);
+        setMessage(null);
+        setExtractedFile(null);
+      } else {
+        setMessage({ type: "error", text: "Please upload a valid PDF file." });
+      }
+    }
+  };
+  // -----------------------------
+
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];
     if (selectedFile) {
@@ -88,6 +111,10 @@ const ExtractImages = () => {
                 <input type="file" accept="application/pdf" onChange={handleFileChange} id="img-upload" className="hidden" />
                 <label
                   htmlFor="img-upload"
+                  // --- ADDED DRAG & DROP HANDLERS ---
+                  onDragOver={handleDragOver}
+                  onDrop={handleDrop}
+                  // ----------------------------------
                   className="flex flex-col items-center justify-center h-40 border-2 border-dashed border-amber-400/50 rounded-2xl bg-amber-500/5 hover:bg-amber-500/10 transition-all cursor-pointer"
                 >
                   <div className="p-3 rounded-full bg-amber-500/20 mb-3 group-hover:scale-110 transition-transform">

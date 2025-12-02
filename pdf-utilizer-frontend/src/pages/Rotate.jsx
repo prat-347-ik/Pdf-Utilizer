@@ -9,12 +9,35 @@ import {
 
 const RotatePDF = () => {
   const [file, setFile] = useState(null);
-  const [angle, setAngle] = useState(90);
+  const [angle, setAngle] = useState(0); // Default to 0 degrees
   const [allPages, setAllPages] = useState(true);
   const [selectedPages, setSelectedPages] = useState("");
   const [rotatedFile, setRotatedFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
+
+  // --- NEW: Drag & Drop Logic ---
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const droppedFile = e.dataTransfer.files[0];
+      if (droppedFile.type === "application/pdf") {
+        setFile(droppedFile);
+        setMessage(null);
+        setRotatedFile(null);
+      } else {
+        setMessage({ type: "error", text: "Please upload a valid PDF file." });
+      }
+    }
+  };
+  // -----------------------------
 
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];
@@ -29,6 +52,11 @@ const RotatePDF = () => {
     if (!file) {
       setMessage({ type: "error", text: "Please select a file." });
       return;
+    }
+
+    if (angle === 0) {
+       setMessage({ type: "error", text: "Please select a rotation angle." });
+       return;
     }
 
     if (!allPages && !selectedPages.trim()) {
@@ -85,6 +113,8 @@ const RotatePDF = () => {
                 <input type="file" accept="application/pdf" onChange={handleFileChange} id="rotate-upload" className="hidden" />
                 <label
                   htmlFor="rotate-upload"
+                  onDragOver={handleDragOver}
+                  onDrop={handleDrop}
                   className="flex flex-col items-center justify-center h-40 border-2 border-dashed border-cyan-400/50 rounded-2xl bg-cyan-500/5 hover:bg-cyan-500/10 transition-all cursor-pointer"
                 >
                   <div className="p-3 rounded-full bg-cyan-500/20 mb-3 group-hover:scale-110 transition-transform">
@@ -109,7 +139,7 @@ const RotatePDF = () => {
                     <p className="text-xs text-gray-500 dark:text-gray-400">Ready to rotate</p>
                   </div>
                 </div>
-                <button onClick={() => { setFile(null); setRotatedFile(null); }} className="p-1.5 hover:bg-black/5 dark:hover:bg-white/10 rounded-full text-gray-400 hover:text-red-500 transition shrink-0">
+                <button onClick={() => { setFile(null); setRotatedFile(null); setAngle(0); }} className="p-1.5 hover:bg-black/5 dark:hover:bg-white/10 rounded-full text-gray-400 hover:text-red-500 transition shrink-0">
                   <X size={18} />
                 </button>
               </motion.div>
@@ -229,7 +259,7 @@ const RotatePDF = () => {
               
               <div className="flex gap-4 justify-center">
                 <button 
-                  onClick={() => { setRotatedFile(null); setFile(null); }}
+                  onClick={() => { setRotatedFile(null); setFile(null); setAngle(0); }}
                   className="px-6 py-3 rounded-xl font-medium bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/20 transition"
                 >
                   Start Over

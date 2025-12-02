@@ -23,6 +23,30 @@ const ProtectPDF = () => {
     else setLockState("closed");
   }, [password]);
 
+  // --- NEW: Drag & Drop Logic ---
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const droppedFile = e.dataTransfer.files[0];
+      if (droppedFile.type === "application/pdf") {
+        setFile(droppedFile);
+        setMessage(null);
+        setProtectedFile(null);
+        setPassword("");
+      } else {
+        setMessage({ type: "error", text: "Please upload a valid PDF file." });
+      }
+    }
+  };
+  // -----------------------------
+
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];
     if (selectedFile) {
@@ -80,6 +104,10 @@ const ProtectPDF = () => {
               />
               <label
                 htmlFor="protect-upload"
+                // --- ADDED EVENT LISTENERS HERE ---
+                onDragOver={handleDragOver}
+                onDrop={handleDrop}
+                // ----------------------------------
                 className="flex flex-col items-center justify-center w-full h-56 border-2 border-dashed border-emerald-500/50 rounded-3xl bg-emerald-500/5 hover:bg-emerald-500/10 transition-all cursor-pointer group relative overflow-hidden"
               >
                 {/* Background Pattern */}
@@ -105,8 +133,8 @@ const ProtectPDF = () => {
                 <div>
                   <h3 className="text-gray-800 dark:text-white font-bold truncate max-w-[200px]">{file.name}</h3>
                   <div className="flex items-center gap-2 mt-1">
-                     <span className="text-xs font-mono bg-emerald-100 dark:bg-black/30 px-2 py-0.5 rounded text-emerald-700 dark:text-emerald-400">AES-256 Ready</span>
-                     <p className="text-xs text-gray-600 dark:text-gray-400">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                      <span className="text-xs font-mono bg-emerald-100 dark:bg-black/30 px-2 py-0.5 rounded text-emerald-700 dark:text-emerald-400">AES-256 Ready</span>
+                      <p className="text-xs text-gray-600 dark:text-gray-400">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
                   </div>
                 </div>
               </div>

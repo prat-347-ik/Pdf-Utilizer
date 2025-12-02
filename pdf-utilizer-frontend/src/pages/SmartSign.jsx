@@ -13,7 +13,7 @@ import {
 import "react-pdf/dist/esm/Page/AnnotationLayer.css";
 import "react-pdf/dist/esm/Page/TextLayer.css";
 
-// ✅ FIX: Use CDN for worker to avoid deployment/build issues with Vite
+//  FIX: Use CDN for worker to avoid deployment/build issues with Vite
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 const SmartSign = () => {
@@ -36,6 +36,47 @@ const SmartSign = () => {
   const [sigPos, setSigPos] = useState({ x: 50, y: 50, width: 150, height: 80 });
 
   const containerRef = useRef(null);
+
+  // --- NEW: Drag & Drop Logic ---
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handlePdfDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const droppedFile = e.dataTransfer.files[0];
+      if (droppedFile.type === "application/pdf") {
+        setPdfFile(droppedFile);
+        setSignedPdfUrl(null);
+        setMessage(null);
+        setPageNumber(1);
+        setPdfRenderedSize({ width: 0, height: 0 });
+        setOriginalPdfSize({ width: 0, height: 0 });
+      } else {
+        setMessage({ type: "error", text: "Please upload a valid PDF file." });
+      }
+    }
+  };
+
+  const handleSignatureDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const droppedFile = e.dataTransfer.files[0];
+      if (droppedFile.type.startsWith("image/")) {
+        setSignatureImg(droppedFile);
+        setMessage(null);
+      } else {
+        setMessage({ type: "error", text: "Please upload a valid image file." });
+      }
+    }
+  };
+  // -----------------------------
 
   // ✅ FIX: Resize Observer to handle responsive PDF width
   useEffect(() => {
@@ -168,6 +209,8 @@ const SmartSign = () => {
                 <input type="file" accept="application/pdf" onChange={handlePdfChange} id="pdf-upload" className="hidden" />
                 <label
                   htmlFor="pdf-upload"
+                  onDragOver={handleDragOver}
+                  onDrop={handlePdfDrop}
                   className={`flex items-center justify-between p-3 border-2 border-dashed rounded-xl cursor-pointer transition-all ${
                     pdfFile 
                       ? "border-green-500/50 bg-green-500/10" 
@@ -182,7 +225,7 @@ const SmartSign = () => {
                       <p className="font-semibold text-gray-700 dark:text-gray-200 truncate max-w-[150px]">
                         {pdfFile ? pdfFile.name : "Select PDF"}
                       </p>
-                      {!pdfFile && <p className="text-xs text-gray-500">Click to browse</p>}
+                      {!pdfFile && <p className="text-xs text-gray-500">Click or Drag to browse</p>}
                     </div>
                   </div>
                   {pdfFile && <CheckCircle size={18} className="text-green-500" />}
@@ -194,6 +237,8 @@ const SmartSign = () => {
                 <input type="file" accept="image/*" onChange={handleSignatureChange} id="sig-upload" className="hidden" />
                 <label
                   htmlFor="sig-upload"
+                  onDragOver={handleDragOver}
+                  onDrop={handleSignatureDrop}
                   className={`flex items-center justify-between p-3 border-2 border-dashed rounded-xl cursor-pointer transition-all ${
                     signatureImg 
                       ? "border-cyan-500/50 bg-cyan-500/10" 
@@ -255,7 +300,7 @@ const SmartSign = () => {
                   <input 
                     type="checkbox" 
                     checked={signAllPages} 
-                    onChange={(e) => setSignAllPages(e.target.checked)}
+                    onChange={(e) => setSignAllPages(e.target.checked)} 
                     className="hidden"
                   />
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-indigo-500 transition">

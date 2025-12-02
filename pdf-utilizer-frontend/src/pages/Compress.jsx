@@ -14,6 +14,29 @@ const CompressPDF = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
 
+  // --- NEW: Drag & Drop Handlers ---
+  const handleDragOver = (e) => {
+    e.preventDefault(); // Prevents browser from opening the file
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault(); // Prevents browser from opening the file
+    e.stopPropagation();
+
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const droppedFile = e.dataTransfer.files[0];
+      if (droppedFile.type === "application/pdf") {
+        setFile(droppedFile);
+        setMessage(null);
+        setCompressedFile(null);
+      } else {
+        setMessage({ type: "error", text: "Please upload a valid PDF file." });
+      }
+    }
+  };
+  // ---------------------------------
+
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];
     if (selectedFile) {
@@ -77,6 +100,8 @@ const CompressPDF = () => {
               />
               <label
                 htmlFor="compress-upload"
+                onDragOver={handleDragOver} // Added Event Listener
+                onDrop={handleDrop}         // Added Event Listener
                 className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-orange-500/50 rounded-2xl bg-orange-500/5 hover:bg-orange-500/10 transition-all cursor-pointer group"
               >
                 <div className="p-4 rounded-full bg-orange-500/20 group-hover:scale-110 transition-transform mb-3">

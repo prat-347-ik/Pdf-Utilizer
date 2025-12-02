@@ -37,7 +37,7 @@ const menuCategories = [
     title: "Security & Sign",
     items: [
       { name: "Protect PDF", path: "/protect", icon: <Shield size={22} /> },
-      { name: "Smart Redact", path: "/smart-redact", icon: <Eraser size={22} /> },
+      { name: "Smart Redact", path: "/redact", icon: <Eraser size={22} /> },
       { name: "Sign Document", path: "/smart-sign", icon: <PenTool size={22} /> },
     ]
   },

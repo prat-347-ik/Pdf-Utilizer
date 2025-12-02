@@ -27,6 +27,30 @@ const PdfToQuiz = () => {
   
   const [stepIndex, setStepIndex] = useState(0);
 
+  // --- NEW: Drag & Drop Logic ---
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const droppedFile = e.dataTransfer.files[0];
+      if (droppedFile.type === "application/pdf") {
+        setFile(droppedFile);
+        setMessage(null);
+        setQuizData(null);
+        setStepIndex(0);
+      } else {
+        setMessage({ type: "error", text: "Please upload a valid PDF file." });
+      }
+    }
+  };
+  // -----------------------------
+
   // Cycle "Thinking" steps
   useEffect(() => {
     if (loading) {
@@ -133,6 +157,10 @@ const PdfToQuiz = () => {
                     <input type="file" accept="application/pdf" onChange={handleFileChange} id="quiz-upload" className="hidden" />
                     <label
                       htmlFor="quiz-upload"
+                      // --- ADDED DRAG & DROP HANDLERS ---
+                      onDragOver={handleDragOver}
+                      onDrop={handleDrop}
+                      // ----------------------------------
                       className="flex flex-col items-center justify-center h-40 border-2 border-dashed border-purple-400/50 rounded-2xl bg-purple-500/5 hover:bg-purple-500/10 transition-all cursor-pointer"
                     >
                       <div className="p-3 rounded-full bg-purple-500/20 mb-3 group-hover:scale-110 transition-transform">

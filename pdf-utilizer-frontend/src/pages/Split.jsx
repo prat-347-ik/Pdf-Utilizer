@@ -14,6 +14,29 @@ const SplitPDF = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
 
+  // --- NEW: Drag & Drop Logic ---
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const droppedFile = e.dataTransfer.files[0];
+      if (droppedFile.type === "application/pdf") {
+        setFile(droppedFile);
+        setMessage(null);
+        setSplitFile(null); // Reset previous result
+      } else {
+        setMessage({ type: "error", text: "Please upload a valid PDF file." });
+      }
+    }
+  };
+  // -----------------------------
+
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];
     if (selectedFile) {
@@ -74,6 +97,8 @@ const SplitPDF = () => {
               />
               <label
                 htmlFor="split-upload"
+                onDragOver={handleDragOver}
+                onDrop={handleDrop}
                 className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-cyan-500/50 rounded-2xl bg-cyan-500/5 hover:bg-cyan-500/10 transition-all cursor-pointer group"
               >
                 <div className="p-4 rounded-full bg-cyan-500/20 group-hover:scale-110 transition-transform mb-3">
