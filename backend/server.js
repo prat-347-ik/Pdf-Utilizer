@@ -16,6 +16,9 @@ import ttsRoutes from './src/routes/ttsRoutes.js'; // Add this
 import chatRoutes from './src/routes/chatRoutes.js';
 // Import the new Redact Routes
 import redactRoutes from './src/routes/redactRoutes.js';
+// Import Diff Routes
+import diffRoutes from './src/routes/diffRoutes.js';
+
 
 dotenv.config();
 
@@ -51,6 +54,10 @@ app.use('/redact', redactRoutes);
 app.get('/', (req, res) => {
   res.send('PDF Utilizer Backend is Running!');
 });
+
+//  MOUNT DIFF ROUTE
+// Endpoint: POST http://localhost:5000/diff
+app.use('/diff', diffRoutes);
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);

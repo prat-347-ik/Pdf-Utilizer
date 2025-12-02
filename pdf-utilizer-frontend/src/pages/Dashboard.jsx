@@ -4,12 +4,15 @@ import { motion } from "framer-motion";
 import { 
   Search, FilePlus, Scissors, FileText, Image, PenTool, 
   Shield, RotateCw, Volume2, Mic, Languages, FileArchive, 
-  Sparkles, Sun, Moon ,Bot
+  Sparkles, Sun, Moon, Bot, FileDiff 
 } from "lucide-react";
 
-// Tools config remains the same
+// Tools config
 const tools = [
   { id: 1, name: "Merge PDFs", path: "/merge", description: "Combine files into one.", icon: <FilePlus size={32} />, color: "bg-purple-500", span: "col-span-2 row-span-2" },
+  
+ 
+
   { id: 2, name: "Split PDF", path: "/split", description: "Extract pages.", icon: <Scissors size={28} />, color: "bg-blue-500", span: "col-span-1 row-span-1" },
   { id: 3, name: "Sign PDF", path: "/smart-sign", description: "Digitally sign docs.", icon: <PenTool size={28} />, color: "bg-emerald-500", span: "col-span-1 row-span-1" },
   { id: 4, name: "Protect PDF", path: "/protect", description: "Encrypt with password.", icon: <Shield size={28} />, color: "bg-indigo-500", span: "col-span-1 row-span-2" },
@@ -19,7 +22,8 @@ const tools = [
   { id: 8, name: "Rotate PDF", path: "/rotate", description: "Fix orientation.", icon: <RotateCw size={28} />, color: "bg-cyan-500", span: "col-span-1 row-span-1" },
   { id: 9, name: "Audiobook", path: "/audiobook", description: "Listen to PDFs.", icon: <Volume2 size={28} />, color: "bg-yellow-500", span: "col-span-1 row-span-1" },
   { id: 10, name: "Translate", path: "/translate", description: "Translate content.", icon: <Languages size={28} />, color: "bg-red-500", span: "col-span-1 row-span-1" },
-  { id: 11, name: "Chat with PDF", path: "/chat",description: "Ask questions to your AI assistant.", icon: <Bot size={32} />, color: "bg-gradient-to-br from-indigo-600 to-violet-600"},
+  { id: 11, name: "Chat with PDF", path: "/chat", description: "Ask questions to your AI assistant.", icon: <Bot size={32} />, color: "bg-gradient-to-br from-indigo-600 to-violet-600" },
+  { id: 12, name: "Visual PDF Diff", path: "/diff", description: "Compare two versions side-by-side & highlight changes.", icon: <FileDiff size={32} />, color: "bg-violet-600", span: "col-span-2 row-span-1" },
 ];
 
 export default function Dashboard() {
@@ -49,14 +53,13 @@ export default function Dashboard() {
   const greeting = hour < 12 ? "Good Morning" : hour < 18 ? "Good Afternoon" : "Good Evening";
 
   return (
-    // Removed "flex" wrapper that held Sidebar. Now it's a simple full-width column.
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 overflow-y-auto font-sans transition-colors duration-300 relative">
         
         {/* Background Gradients */}
         <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-purple-500/20 rounded-full blur-[120px] pointer-events-none" />
         <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-blue-500/20 rounded-full blur-[100px] pointer-events-none" />
 
-        {/* CONTAINER FOR CONTENT (Added max-w-7xl to keep it readable on huge screens) */}
+        {/* CONTAINER FOR CONTENT */}
         <div className="max-w-7xl mx-auto flex flex-col min-h-screen z-10 relative">
 
             {/* HEADER */}

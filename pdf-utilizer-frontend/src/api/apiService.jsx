@@ -38,6 +38,15 @@ export const compressPDF = (formData) => api.post("/pdf/compress", formData,{
   responseType:"blob",
 });
 
+// 1. Smart Redaction API
+export const redactPDF = (formData) => api.post("/redact", formData, {
+  responseType: "blob",
+});
+
+// 2. Visual Diff API (The line you requested)
+export const comparePDFs = (formData) => api.post("/diff", formData, {
+  responseType: "blob", // Critical for receiving the binary PDF
+});
 // TTS API
 export const textToSpeech = (formData) => api.post("/tts/convert", formData,{
   responseType:"blob",
