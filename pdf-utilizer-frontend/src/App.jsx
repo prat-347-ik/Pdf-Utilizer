@@ -18,6 +18,7 @@ import Audiobook from "./pages/Audiobook";
 import LandingPage from "./pages/LandingPage";
 import ChatWithPdf from "./pages/ChatWithPdf";
 import PdfDiff from './pages/PdfDiff';  
+import SmartRedact from './pages/SmartRedact';
 import Navbar from "./components/Navbar";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -49,6 +50,7 @@ function App() {
             <Route path="/smart-sign" element={<SmartSign />} />
             <Route path="/audiobook" element={<Audiobook />} />
             <Route path="/chat" element={<ChatWithPdf/>} />
+            <Route path="/redact" element={<SmartRedact />} />
             <Route path="/diff" element={<PdfDiff />} />
           </Routes>
         </div>

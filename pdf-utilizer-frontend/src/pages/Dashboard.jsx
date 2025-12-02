@@ -1,19 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { 
   Search, FilePlus, Scissors, FileText, Image, PenTool, 
   Shield, RotateCw, Volume2, Mic, Languages, FileArchive, 
-  Sparkles, Sun, Moon, Bot, FileDiff 
+  Sparkles, Sun, Moon, Bot, FileDiff, EyeOff 
 } from "lucide-react";
 
 // Tools config
 const tools = [
   { id: 1, name: "Merge PDFs", path: "/merge", description: "Combine files into one.", icon: <FilePlus size={32} />, color: "bg-purple-500", span: "col-span-2 row-span-2" },
-  
- 
-
-  { id: 2, name: "Split PDF", path: "/split", description: "Extract pages.", icon: <Scissors size={28} />, color: "bg-blue-500", span: "col-span-1 row-span-1" },
+  {id: 2, name: "Split PDF", path: "/split", description: "Extract pages.", icon: <Scissors size={28} />, color: "bg-blue-500", span: "col-span-1 row-span-1" },
   { id: 3, name: "Sign PDF", path: "/smart-sign", description: "Digitally sign docs.", icon: <PenTool size={28} />, color: "bg-emerald-500", span: "col-span-1 row-span-1" },
   { id: 4, name: "Protect PDF", path: "/protect", description: "Encrypt with password.", icon: <Shield size={28} />, color: "bg-indigo-500", span: "col-span-1 row-span-2" },
   { id: 5, name: "Compress", path: "/compress", description: "Reduce file size.", icon: <FileArchive size={28} />, color: "bg-orange-500", span: "col-span-1 row-span-1" },
@@ -23,7 +20,8 @@ const tools = [
   { id: 9, name: "Audiobook", path: "/audiobook", description: "Listen to PDFs.", icon: <Volume2 size={28} />, color: "bg-yellow-500", span: "col-span-1 row-span-1" },
   { id: 10, name: "Translate", path: "/translate", description: "Translate content.", icon: <Languages size={28} />, color: "bg-red-500", span: "col-span-1 row-span-1" },
   { id: 11, name: "Chat with PDF", path: "/chat", description: "Ask questions to your AI assistant.", icon: <Bot size={32} />, color: "bg-gradient-to-br from-indigo-600 to-violet-600" },
-  { id: 12, name: "Visual PDF Diff", path: "/diff", description: "Compare two versions side-by-side & highlight changes.", icon: <FileDiff size={32} />, color: "bg-violet-600", span: "col-span-2 row-span-1" },
+  { id: 12, name: "Visual PDF Diff", path: "/diff", description: "Compare two versions side-by-side & highlight changes.", icon: <FileDiff size={32} />,color: "bg-violet-600", span: "col-span-2 row-span-1" },
+  { id: 13, name: "Smart Redact", path: "/redact", description: "Auto-detect & blackout sensitive PII.", icon: <EyeOff size={32} />, color: "bg-red-600", span: "col-span-2 row-span-1" },
 ];
 
 export default function Dashboard() {
@@ -45,19 +43,24 @@ export default function Dashboard() {
     document.documentElement.classList.toggle("dark");
   };
 
-  const filteredTools = tools.filter(tool => 
+  // OPTIMIZATION: Memoize filtering to prevent re-calc on every render
+  const filteredTools = useMemo(() => tools.filter(tool => 
     tool.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  ), [searchTerm]);
 
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good Morning" : hour < 18 ? "Good Afternoon" : "Good Evening";
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 overflow-y-auto font-sans transition-colors duration-300 relative">
+    // OPTIMIZATION: Removed overflow-y-auto from here to let body handle scroll naturally 
+    // or keep it but ensure backgrounds are fixed.
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 font-sans transition-colors duration-300 relative selection:bg-purple-500/30">
         
-        {/* Background Gradients */}
-        <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-purple-500/20 rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-blue-500/20 rounded-full blur-[100px] pointer-events-none" />
+        {/* OPTIMIZATION: Changed 'absolute' to 'fixed'. 
+           This detaches them from the scroll flow, saving massive GPU power.
+        */}
+        <div className="fixed top-[-20%] right-[-10%] w-[600px] h-[600px] bg-purple-500/20 rounded-full blur-[120px] pointer-events-none z-0" />
+        <div className="fixed bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-blue-500/20 rounded-full blur-[100px] pointer-events-none z-0" />
 
         {/* CONTAINER FOR CONTENT */}
         <div className="max-w-7xl mx-auto flex flex-col min-h-screen z-10 relative">
@@ -105,7 +108,8 @@ export default function Dashboard() {
                 <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="col-span-1 row-span-1 bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl p-6 text-white shadow-xl flex flex-col justify-between border border-white/10"
+                // OPTIMIZATION: will-change-transform helps browser optimization
+                className="will-change-transform col-span-1 row-span-1 bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl p-6 text-white shadow-xl flex flex-col justify-between border border-white/10"
                 >
                 <div className="flex justify-between items-start">
                     <div className="p-2 bg-white/10 rounded-lg"><Sparkles size={20} /></div>
@@ -124,8 +128,8 @@ export default function Dashboard() {
                     layout
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: index * 0.05 }}
-                    className={`relative group overflow-hidden rounded-3xl shadow-sm hover:shadow-2xl transition-all duration-300 border border-white/50 dark:border-white/5 bg-white dark:bg-white/5 ${tool.span || "col-span-1 row-span-1"}`}
+                    transition={{ delay: 0.05 }} // Reduced stagger delay for snappier feel
+                    className={`will-change-transform relative group overflow-hidden rounded-3xl shadow-sm hover:shadow-2xl transition-all duration-300 border border-white/50 dark:border-white/5 bg-white dark:bg-white/5 ${tool.span || "col-span-1 row-span-1"}`}
                 >
                     <Link to={tool.path} className="flex flex-col h-full w-full p-6 relative z-10">
                     <div className={`w-12 h-12 rounded-xl ${tool.color} flex items-center justify-center text-white shadow-lg mb-4 group-hover:scale-110 transition-transform duration-300`}>
