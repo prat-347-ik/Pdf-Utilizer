@@ -17,25 +17,30 @@ export const mergePDFs = (formData) =>
     responseType: "blob", // Expect a file response
   });
 
-export const splitPDF = (formData) => api.post("/pdf/split", formData,{
+export const splitPDF = (formData) => api.post("/pdf/split", formData, {
   responseType: "blob", // Expect a file response
 });
+
 export const extractText = (formData) => api.post("/pdf/extract-text", formData); // Removed responseType blob
 
-export const extractImages = (formData) => api.post("/pdf/extract-images", formData,{
-  responseType:"blob",
-});
-export const signPDF = (formData) => api.post("/pdf/sign", formData,{
+export const extractImages = (formData) => api.post("/pdf/extract-images", formData, {
   responseType: "blob",
 });
-export const protectPDF = (formData) => api.post("/pdf/protect", formData,{
+
+export const signPDF = (formData) => api.post("/pdf/sign", formData, {
   responseType: "blob",
 });
-export const rotatePDF = (formData) => api.post("/pdf/rotate", formData,{
+
+export const protectPDF = (formData) => api.post("/pdf/protect", formData, {
   responseType: "blob",
 });
-export const compressPDF = (formData) => api.post("/pdf/compress", formData,{
-  responseType:"blob",
+
+export const rotatePDF = (formData) => api.post("/pdf/rotate", formData, {
+  responseType: "blob",
+});
+
+export const compressPDF = (formData) => api.post("/pdf/compress", formData, {
+  responseType: "blob",
 });
 
 // 1. Smart Redaction API
@@ -43,14 +48,16 @@ export const redactPDF = (formData) => api.post("/redact", formData, {
   responseType: "blob",
 });
 
-// 2. Visual Diff API (The line you requested)
+// 2. Visual Diff API
 export const comparePDFs = (formData) => api.post("/diff", formData, {
   responseType: "blob", // Critical for receiving the binary PDF
 });
+
 // TTS API
-export const textToSpeech = (formData) => api.post("/tts/convert", formData,{
-  responseType:"blob",
+export const textToSpeech = (formData) => api.post("/tts/convert", formData, {
+  responseType: "blob",
 });
+
 // STT: Upload audio file (returns PDF)
 export const convertSpeechToText = (formData) =>
   api.post("/stt/convert", formData, {
@@ -83,14 +90,18 @@ export const convertSpeechFromMic = async (audioBase64) => {
   }
 };
 
-
-
-
 // Translate API
-export const translateText = (formData) => api.post("/api/translate", formData,{
-  responseType:"blob",
+export const translateText = (formData) => api.post("/api/translate", formData, {
+  responseType: "blob",
 });
 
-
+export const generateQuiz = (formData) => 
+  api.post("/api/quiz/generate", formData, {
+    // REMOVED responseType: 'blob' 
+    // Default is JSON, which is what we want now.
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+});
 
 export default api;

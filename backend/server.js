@@ -18,6 +18,8 @@ import chatRoutes from './src/routes/chatRoutes.js';
 import redactRoutes from './src/routes/redactRoutes.js';
 // Import Diff Routes
 import diffRoutes from './src/routes/diffRoutes.js';
+// Impoert Quiz Routes
+import quizRoutes from './src/routes/quizRoutes.js';
 
 
 dotenv.config();
@@ -50,6 +52,8 @@ app.use('/tts', ttsRoutes); // Add this
 app.use('/api/chat', chatRoutes); // PDF Chat RAG
 // This creates the endpoint: POST http://localhost:5000/redact
 app.use('/redact', redactRoutes);
+// This creates the endpoint: POST http://localhost:5000/api/quiz
+app.use('/api/quiz', quizRoutes);
 
 app.get('/', (req, res) => {
   res.send('PDF Utilizer Backend is Running!');

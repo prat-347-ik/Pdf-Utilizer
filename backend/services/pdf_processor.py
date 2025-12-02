@@ -15,6 +15,8 @@ from tts_utils import text_to_speech
 # Import RAG functions
 from rag_utils import ingest_pdf, ask_pdf
 
+# Import quiz functions
+from quiz_utils import extract_text_for_quiz, generate_quiz_json
 
 
 # Import functions from your provided utils file
@@ -122,7 +124,7 @@ def main():
             # 2. Get Target Language
             target_lang = payload.get('lang', 'en')
 
-            # 3. ✅ TRANSLATE TEXT (The Fix)
+            # 3. TRANSLATE TEXT (The Fix)
             # This converts "Hello" -> "नमस्ते" if lang is 'hi'
             # If lang is 'en', it just cleans up the English text
             final_text = translate_text_content(text_content, target_lang)
@@ -145,6 +147,19 @@ def main():
             result = ask_pdf(payload['query'], payload['index_id'])
             if "error" in result: raise Exception(result['error'])
             send_response(True, data=result)    
+
+        # --- 13. GENERATE QUIZ ---
+        elif operation == "generate_quiz":
+            # 1. Extract Text
+            text_content = extract_text_for_quiz(payload['file'])
+            if len(text_content) < 100:
+                raise Exception("PDF text is too short to generate a quiz.")
+
+            # 2. Get JSON Data (Questions + Explanations)
+            quiz_data = generate_quiz_json(text_content)
+            
+            # 3. Send JSON back to Node.js (No PDF creation)
+            send_response(True, data={"quiz": quiz_data})  
 
         else:
             raise Exception(f"Unknown operation: {operation}")

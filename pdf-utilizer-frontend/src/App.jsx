@@ -19,6 +19,7 @@ import LandingPage from "./pages/LandingPage";
 import ChatWithPdf from "./pages/ChatWithPdf";
 import PdfDiff from './pages/PdfDiff';  
 import SmartRedact from './pages/SmartRedact';
+import PdfToQuiz from './pages/Quiz';
 import Navbar from "./components/Navbar";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -52,6 +53,7 @@ function App() {
             <Route path="/chat" element={<ChatWithPdf/>} />
             <Route path="/redact" element={<SmartRedact />} />
             <Route path="/diff" element={<PdfDiff />} />
+            <Route path="/study-quiz" element={<PdfToQuiz />} />
           </Routes>
         </div>
       </div>
