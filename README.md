@@ -1,7 +1,5 @@
 # PDF Utilizer - Backend
 
-# PDF Utilizer - Backend
-
 ![Node.js](https://img.shields.io/badge/Node.js-v18%2B-43853D?style=flat&logo=node.js&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-v3.10%2B-3776AB?style=flat&logo=python&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-v14%2B-336791?style=flat&logo=postgresql&logoColor=white)
@@ -111,7 +109,7 @@ npm start
 The server will start on: http://localhost:5000
 
 ## 📂 Project Structure
-
+```
 backend/
 ├── src/
 │   ├── config/         # Database and App Config
@@ -130,7 +128,7 @@ backend/
 ├── processed/          # Temp Output Files
 ├── fonts/              # Custom Fonts for PDF Generation
 └── server.js           # App Entry Point
-
+```
 ## 🛠 Troubleshooting
  **Issue: "Python script failed with code 1"**
  -Check Venv: Ensure you activated your virtual environment before running the Node server, or set the PYTHON_PATH in your .env to point directly to the venv executable (e.g., backend/venv/bin/python).
