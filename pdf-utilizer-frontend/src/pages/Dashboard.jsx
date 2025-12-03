@@ -1,6 +1,7 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useContext } from "react"; 
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { AuthContext } from "../context/AuthContext"; // Import Context
 import { 
   Search, FilePlus, Scissors, FileText, Image, PenTool, 
   Shield, RotateCw, Volume2, Mic, Languages, FileArchive, 
@@ -26,64 +27,67 @@ const tools = [
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const [username, setUsername] = useState("User");
+  const { user, isGuest, logout } = useContext(AuthContext); 
   const [searchTerm, setSearchTerm] = useState("");
   const [darkMode, setDarkMode] = useState(false);
 
   useEffect(() => {
-    const storedUsername = localStorage.getItem("username");
-    if (!storedUsername) navigate("/login");
-    else setUsername(storedUsername);
-    
+    // Redirect only if NOT user AND NOT guest
+    if (!user && !isGuest) {
+        navigate("/login");
+    }
     if (document.documentElement.classList.contains("dark")) setDarkMode(true);
-  }, [navigate]);
+  }, [user, isGuest, navigate]);
 
   const toggleTheme = () => {
     setDarkMode(!darkMode);
     document.documentElement.classList.toggle("dark");
   };
 
-  // OPTIMIZATION: Memoize filtering to prevent re-calc on every render
   const filteredTools = useMemo(() => tools.filter(tool => 
     tool.name.toLowerCase().includes(searchTerm.toLowerCase())
   ), [searchTerm]);
 
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good Morning" : hour < 18 ? "Good Afternoon" : "Good Evening";
+  
+  // FIX: Robust logic to prevent crash if user object exists but lacks username property
+  const displayName = user?.username || "Guest";
 
   return (
-    // OPTIMIZATION: Removed overflow-y-auto from here to let body handle scroll naturally 
-    // or keep it but ensure backgrounds are fixed.
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 font-sans transition-colors duration-300 relative selection:bg-purple-500/30">
         
-        {/* OPTIMIZATION: Changed 'absolute' to 'fixed'. 
-           This detaches them from the scroll flow, saving massive GPU power.
-        */}
         <div className="fixed top-[-20%] right-[-10%] w-[600px] h-[600px] bg-purple-500/20 rounded-full blur-[120px] pointer-events-none z-0" />
         <div className="fixed bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-blue-500/20 rounded-full blur-[100px] pointer-events-none z-0" />
 
-        {/* CONTAINER FOR CONTENT */}
         <div className="max-w-7xl mx-auto flex flex-col min-h-screen z-10 relative">
-
             {/* HEADER */}
             <header className="flex justify-between items-center p-8">
             <div className="flex flex-col">
                 <h1 className="text-4xl font-extrabold text-gray-800 dark:text-white flex items-center gap-3">
-                {greeting}, {username} <span className="text-3xl">👋</span>
+                {greeting}, {displayName} <span className="text-3xl">👋</span>
                 </h1>
                 <p className="text-gray-500 dark:text-gray-400 mt-1">
-                Welcome to your workspace.
+                  {isGuest ? "You are using Guest Mode. Files are not saved." : "Welcome back to your workspace."}
                 </p>
             </div>
 
             <div className="flex items-center gap-4">
-                <button 
-                onClick={toggleTheme}
-                className="p-3 rounded-full bg-white dark:bg-white/10 shadow-lg hover:scale-110 transition text-gray-800 dark:text-white"
-                >
-                {darkMode ? <Sun size={20} /> : <Moon size={20} />}
+                {isGuest && (
+                    <Link to="/login" className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">
+                        Login to Save Work
+                    </Link>
+                )}
+                
+                <button onClick={toggleTheme} className="p-3 rounded-full bg-white dark:bg-white/10 shadow-lg hover:scale-110 transition text-gray-800 dark:text-white">
+                    {darkMode ? <Sun size={20} /> : <Moon size={20} />}
                 </button>
-                <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-purple-500 to-pink-500 border-2 border-white shadow-lg"></div>
+
+                {!isGuest && (
+                    <div onClick={logout} className="h-10 w-10 rounded-full bg-gradient-to-tr from-purple-500 to-pink-500 border-2 border-white shadow-lg cursor-pointer flex items-center justify-center text-white font-bold" title="Logout">
+                        {displayName.charAt(0).toUpperCase()}
+                    </div>
+                )}
             </div>
             </header>
 
@@ -108,7 +112,6 @@ export default function Dashboard() {
                 <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                // OPTIMIZATION: will-change-transform helps browser optimization
                 className="will-change-transform col-span-1 row-span-1 bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl p-6 text-white shadow-xl flex flex-col justify-between border border-white/10"
                 >
                 <div className="flex justify-between items-start">
@@ -128,7 +131,7 @@ export default function Dashboard() {
                     layout
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.05 }} // Reduced stagger delay for snappier feel
+                    transition={{ delay: 0.05 }} 
                     className={`will-change-transform relative group overflow-hidden rounded-3xl shadow-sm hover:shadow-2xl transition-all duration-300 border border-white/50 dark:border-white/5 bg-white dark:bg-white/5 ${tool.span || "col-span-1 row-span-1"}`}
                 >
                     <Link to={tool.path} className="flex flex-col h-full w-full p-6 relative z-10">

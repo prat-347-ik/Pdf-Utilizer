@@ -1,11 +1,22 @@
-
-import { Link } from "react-router-dom";
+import { useContext } from "react"; // Added useContext
+import { Link, useNavigate } from "react-router-dom"; // Added useNavigate
 import { motion } from "framer-motion";
+import { AuthContext } from "../context/AuthContext"; // Import AuthContext
 import { 
   FileText, Shield, PenTool, Layers, ArrowRight, 
-  Zap, CheckCircle, Scissors, FileImage, Mic2 
+  Zap, Scissors, FileImage, Mic2 
 } from "lucide-react";
+
 const LandingPage = () => {
+  const navigate = useNavigate();
+  const { loginAsGuest } = useContext(AuthContext); // Get the guest login function
+
+  // Handler for the Explore Tools button
+  const handleGuestAccess = () => {
+    loginAsGuest(); // Set state to isGuest = true
+    navigate("/dashboard"); // Redirect to dashboard
+  };
+
   return (
     <div className="min-h-screen bg-gray-950 text-white selection:bg-purple-500/30 font-sans overflow-x-hidden">
       
@@ -14,6 +25,7 @@ const LandingPage = () => {
         <div className="absolute top-[-10%] left-[-10%] w-[800px] h-[800px] bg-purple-600/20 rounded-full blur-[120px] opacity-50" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-cyan-600/20 rounded-full blur-[120px] opacity-50" />
       </div>
+
       {/* --- NAVBAR --- */}
       <nav className="relative z-50 px-6 py-6 max-w-7xl mx-auto flex justify-between items-center">
         <div className="flex items-center gap-2">
@@ -33,6 +45,7 @@ const LandingPage = () => {
           </Link>
         </div>
       </nav>
+
       {/* --- HERO SECTION --- */}
       <header className="relative z-10 pt-20 pb-32 px-6">
         <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
@@ -66,11 +79,15 @@ const LandingPage = () => {
                   Start for Free <ArrowRight size={20} />
                 </button>
               </Link>
-              <Link to="/dashboard">
-                <button className="w-full sm:w-auto px-8 py-4 bg-white/5 border border-white/10 hover:bg-white/10 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition">
-                  Explore Tools
-                </button>
-              </Link>
+              
+              {/* UPDATED EXPLORE TOOLS BUTTON */}
+              <button 
+                onClick={handleGuestAccess}
+                className="w-full sm:w-auto px-8 py-4 bg-white/5 border border-white/10 hover:bg-white/10 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition"
+              >
+                Explore Tools
+              </button>
+
             </div>
             <div className="mt-8 flex items-center gap-4 text-sm text-gray-500">
               <div className="flex -space-x-2">
@@ -81,6 +98,7 @@ const LandingPage = () => {
               <p>Trusted by 10,000+ users</p>
             </div>
           </motion.div>
+
           {/* Right: 3D Floating Visuals */}
           <div className="relative h-[500px] hidden lg:block perspective-1000">
             {/* Main Dashboard Card (Tilted) */}
@@ -144,11 +162,11 @@ const LandingPage = () => {
           </div>
         </div>
       </header>
+
       {/* --- FEATURE STRIP --- */}
       <div className="border-y border-white/5 bg-white/5 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto py-8 overflow-hidden">
           <div className="flex gap-12 justify-center items-center opacity-50 grayscale hover:grayscale-0 transition-all duration-500 flex-wrap px-6">
-             {/* Use Icons as "Logos" */}
              <span className="flex items-center gap-2 font-bold text-lg"><Layers /> Merge</span>
              <span className="flex items-center gap-2 font-bold text-lg"><Scissors /> Split</span>
              <span className="flex items-center gap-2 font-bold text-lg"><FileText /> OCR</span>
@@ -159,6 +177,7 @@ const LandingPage = () => {
           </div>
         </div>
       </div>
+
       {/* --- BENTO GRID TEASER --- */}
       <section className="py-24 px-6 relative z-10">
         <div className="max-w-6xl mx-auto">
@@ -191,6 +210,7 @@ const LandingPage = () => {
           </div>
         </div>
       </section>
+
       {/* --- FOOTER CTA --- */}
       <section className="py-20 text-center px-6">
         <div className="max-w-4xl mx-auto bg-gradient-to-b from-purple-900/50 to-transparent border border-purple-500/30 rounded-3xl p-12">
