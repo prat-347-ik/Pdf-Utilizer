@@ -1,54 +1,83 @@
 import { createContext, useState, useEffect } from "react";
+import axios from "axios";
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [isGuest, setIsGuest] = useState(false); // New State for Guest Mode
+  const [isGuest, setIsGuest] = useState(false);
+  const [loading, setLoading] = useState(true); // START AS TRUE
 
-  useEffect(() => {
-    // Check for existing session
-    const storedUser = localStorage.getItem("username");
+  // Function to verify or refresh token
+  const checkAuth = async () => {
     const token = localStorage.getItem("token");
+    const refreshToken = localStorage.getItem("refreshToken");
+    const storedUsername = localStorage.getItem("username");
 
-    if (storedUser && token) {
-      // User is logged in
-      setUser({ username: storedUser, plan: 'free' }); // Default to free for now
-      setIsGuest(false);
-    } else {
-      // No user found, default to null (will require login or guest selection)
-      setUser(null);
-      setIsGuest(false);
+    // 1. If no data, stop loading, user is null.
+    if (!token || !storedUsername) {
+      setLoading(false);
+      return;
     }
-  }, []);
 
-  // Login function called by Login.jsx
-  const login = (userData) => {
-    // Handle if userData is just a string (username) or an object
-    const username = typeof userData === 'string' ? userData : userData.username;
-    
-    localStorage.setItem("username", username);
-    // Token is usually set in Login.jsx, but good to have sync logic if needed
-    
-    setUser({ username, plan: 'free' }); // You can fetch real plan from DB later
-    setIsGuest(false);
+    try {
+        // Optional: Call a lightweight /me endpoint to verify 'token' is valid
+        // For now, we assume if it exists, it's valid, OR we try to refresh if needed.
+        
+        // Simple expiry check (JWT decode) could go here. 
+        // Instead, let's just restore the user state.
+        setUser({ username: storedUsername, plan: 'free' });
+        setLoading(false);
+
+    } catch (error) {
+        // If token is invalid, try to refresh
+        if (refreshToken) {
+            try {
+                const res = await axios.post("http://localhost:5000/auth/refresh", { refreshToken });
+                localStorage.setItem("token", res.data.access_token);
+                setUser({ username: storedUsername, plan: 'free' });
+            } catch (refreshErr) {
+                console.error("Refresh failed", refreshErr);
+                logout(); // Token invalid, force logout
+            }
+        } else {
+            logout();
+        }
+        setLoading(false);
+    }
   };
 
-  // New function for "Continue as Guest"
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
+  const login = (userData) => {
+    const username = userData.username || userData;
+    // Note: Tokens are set in Login.jsx, but good to ensure syncing here if needed
+    setUser({ username, plan: 'free' });
+    setIsGuest(false);
+    setLoading(false);
+  };
+
   const loginAsGuest = () => {
     setIsGuest(true);
-    setUser(null); // Guests don't have user profiles
+    setUser(null);
+    setLoading(false);
   };
 
   const logout = () => {
-    localStorage.removeItem("username");
-    localStorage.removeItem("token");
+    // Call backend to revoke (Optional but recommended)
+    const username = localStorage.getItem("username");
+    axios.post("http://localhost:5000/auth/logout", { username }).catch(err => console.log(err));
+
+    localStorage.clear(); // Clear all tokens
     setUser(null);
     setIsGuest(false);
+    setLoading(false);
   };
 
   return (
-    <AuthContext.Provider value={{ user, isGuest, login, loginAsGuest, logout }}>
+    <AuthContext.Provider value={{ user, isGuest, loading, login, loginAsGuest, logout }}>
       {children}
     </AuthContext.Provider>
   );

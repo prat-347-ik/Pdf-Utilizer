@@ -20,11 +20,14 @@ const Login = () => {
     setMessage(null);
 
     try {
-      const response = await axios.post("http://localhost:5000/auth/login", { username, password });
-      localStorage.setItem("token", response.data.access_token);
-      login(username);
-      setMessage({ type: "success", text: "Login successful! Redirecting..." });
-      setTimeout(() => navigate("/dashboard"), 1000);
+        const response = await axios.post("http://localhost:5000/auth/login", { username, password });
+
+        localStorage.setItem("token", response.data.access_token);
+        localStorage.setItem("refreshToken", response.data.refresh_token); // Store this!
+        localStorage.setItem("username", username); // Still useful for quick UI display
+        login(username);
+        setMessage({ type: "success", text: "Login successful! Redirecting..." });
+        setTimeout(() => navigate("/dashboard"), 1000);
     } catch (error) {
       setMessage({ type: "error", text: error.response?.data?.error || "Invalid credentials" });
       setLoading(false);

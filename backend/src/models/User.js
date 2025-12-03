@@ -16,30 +16,18 @@ const User = sequelize.define('User', {
     type: DataTypes.STRING(200),
     allowNull: false
   },
-  // --- NEW FIELDS ---
-  fullName: {
-    type: DataTypes.STRING(100),
+  // --- NEW FIELD ---
+  refreshToken: {
+    type: DataTypes.TEXT,
     allowNull: true
   },
-  avatar: {
-    type: DataTypes.STRING(255), // URL to avatar image
-    allowNull: true
-  },
-  role: { 
-    type: DataTypes.ENUM('user', 'admin'), 
-    defaultValue: 'user' 
-  },
-  plan: { 
-    type: DataTypes.ENUM('free', 'pro'), 
-    defaultValue: 'free' 
-  },
-  // Simple usage tracking (reset this via cron job monthly if needed)
-  usageCount: { 
-    type: DataTypes.INTEGER, 
-    defaultValue: 0 
-  }
+  // ... (Keep your profile fields from previous steps if you added them)
+  fullName: { type: DataTypes.STRING(100), allowNull: true },
+  avatar: { type: DataTypes.STRING(255), allowNull: true },
+  role: { type: DataTypes.ENUM('user', 'admin'), defaultValue: 'user' },
+  plan: { type: DataTypes.ENUM('free', 'pro'), defaultValue: 'free' },
 }, {
-  timestamps: true, // Changed to true to track createdAt/updatedAt
+  timestamps: true,
   tableName: 'user'
 });
 

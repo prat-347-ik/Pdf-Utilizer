@@ -27,17 +27,23 @@ const tools = [
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { user, isGuest, logout } = useContext(AuthContext); 
+  // Get loading state from context to prevent premature redirects
+  const { user, isGuest, loading, logout } = useContext(AuthContext); 
   const [searchTerm, setSearchTerm] = useState("");
   const [darkMode, setDarkMode] = useState(false);
 
   useEffect(() => {
-    // Redirect only if NOT user AND NOT guest
+    // 1. If AuthContext is still loading (checking localStorage), DO NOTHING.
+    if (loading) return;
+
+    // 2. Once loading is done, if no user and not guest, redirect.
     if (!user && !isGuest) {
         navigate("/login");
     }
+    
+    // Theme check
     if (document.documentElement.classList.contains("dark")) setDarkMode(true);
-  }, [user, isGuest, navigate]);
+  }, [user, isGuest, loading, navigate]);
 
   const toggleTheme = () => {
     setDarkMode(!darkMode);
@@ -53,6 +59,15 @@ export default function Dashboard() {
   
   // FIX: Robust logic to prevent crash if user object exists but lacks username property
   const displayName = user?.username || "Guest";
+
+  // RENDER LOADING SPINNER if authentication is still being checked
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 font-sans transition-colors duration-300 relative selection:bg-purple-500/30">
@@ -112,6 +127,7 @@ export default function Dashboard() {
                 <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
+                // OPTIMIZATION: will-change-transform helps browser optimization
                 className="will-change-transform col-span-1 row-span-1 bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl p-6 text-white shadow-xl flex flex-col justify-between border border-white/10"
                 >
                 <div className="flex justify-between items-start">
