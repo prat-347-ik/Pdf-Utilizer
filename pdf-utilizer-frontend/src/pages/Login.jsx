@@ -1,7 +1,7 @@
 import { useState, useContext, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
+import { loginUser } from "../api/apiService"; // Import centralized API
 import { motion } from "framer-motion";
 import { LogIn, User, Lock, ArrowRight, AlertCircle, CheckCircle } from "lucide-react";
 
@@ -20,16 +20,23 @@ const Login = () => {
     setMessage(null);
 
     try {
-        const response = await axios.post("http://localhost:5000/auth/login", { username, password });
+      // Use the centralized API service
+      const response = await loginUser({ username, password });
 
-        localStorage.setItem("token", response.data.access_token);
-        localStorage.setItem("refreshToken", response.data.refresh_token); // Store this!
-        localStorage.setItem("username", username); // Still useful for quick UI display
-        login(username);
-        setMessage({ type: "success", text: "Login successful! Redirecting..." });
-        setTimeout(() => navigate("/dashboard"), 1000);
+      // The structure of response.data depends on your backend, 
+      // matching your previous axios call structure:
+      localStorage.setItem("token", response.data.access_token);
+      localStorage.setItem("refreshToken", response.data.refresh_token); 
+      localStorage.setItem("username", username); 
+      
+      login(username);
+      setMessage({ type: "success", text: "Login successful! Redirecting..." });
+      
+      setTimeout(() => navigate("/dashboard"), 1000);
     } catch (error) {
-      setMessage({ type: "error", text: error.response?.data?.error || "Invalid credentials" });
+      // Handle errors consistently
+      const errorMsg = error.response?.data?.error || "Invalid credentials";
+      setMessage({ type: "error", text: errorMsg });
       setLoading(false);
     }
   };

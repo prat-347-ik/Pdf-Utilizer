@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import axios from "axios";
+import { registerUser } from "../api/apiService"; // Import centralized API
 import { motion } from "framer-motion";
 import { UserPlus, User, Mail, Lock, ArrowRight, AlertCircle, CheckCircle } from "lucide-react";
 
@@ -21,15 +21,18 @@ const Register = () => {
     setMessage(null);
 
     try {
-      const response = await axios.post("http://localhost:5000/auth/register", {
+      // Use the centralized API service
+      await registerUser({
         username,
         email,
         password,
       });
+
       setMessage({ type: "success", text: "Account created! Redirecting..." });
       setTimeout(() => navigate("/login"), 2000);
     } catch (error) {
-      setMessage({ type: "error", text: error.response?.data?.error || "Registration failed" });
+      const errorMsg = error.response?.data?.error || "Registration failed";
+      setMessage({ type: "error", text: errorMsg });
       setLoading(false);
     }
   };
@@ -37,8 +40,8 @@ const Register = () => {
   return (
     <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center relative overflow-hidden">
       
-      {/* Ambient Background Glows */}
-      <div className="absolute top-[-10%] right-[-10%] w-[600px] h-[600px] bg-emerald-600/20 rounded-full blur-[120px] animate-pulse" />
+      {/* Background Ambience */}
+      <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-emerald-600/20 rounded-full blur-[120px] animate-pulse" />
       <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-cyan-600/20 rounded-full blur-[120px] animate-pulse delay-1000" />
 
       <motion.div 
@@ -54,7 +57,7 @@ const Register = () => {
           <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
             Create Account
           </h2>
-          <p className="text-gray-400 mt-2 text-sm">Join us and start optimizing your PDFs.</p>
+          <p className="text-gray-400 mt-2 text-sm">Join us and start managing your PDFs efficiently.</p>
         </div>
 
         {message && (
