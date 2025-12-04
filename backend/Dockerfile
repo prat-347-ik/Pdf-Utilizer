@@ -29,8 +29,10 @@ RUN npm install
 RUN pip install -r requirements.txt
 
 # --- NEW STEP: Download Spacy NLP Model ---
-# This ensures the model is baked into the image
-RUN python -m spacy download en_core_web_lg
+# --- UPDATED STEP: Install Spacy Model directly via PIP ---
+# We replace the 'python -m spacy download' command with this direct link.
+# This bypasses the downloader glitch.
+RUN pip install https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-3.7.1/en_core_web_lg-3.7.1-py3-none-any.whl
 
 # 8. Copy the rest of your backend code
 COPY . .
