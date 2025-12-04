@@ -20,6 +20,7 @@ import ChatWithPdf from "./pages/ChatWithPdf";
 import PdfDiff from './pages/PdfDiff';  
 import SmartRedact from './pages/SmartRedact';
 import PdfToQuiz from './pages/Quiz';
+import Settings from "./pages/Settings";
 import Navbar from "./components/Navbar";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -35,6 +36,7 @@ function App() {
             <Route path="/" element={<LandingPage />} /> {/* Show landing page first */}
             <Route path="/login" element={<Login />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/settings" element={<Settings />} />
             <Route path="/merge" element={<Merge />} />
             <Route path="/split" element={<Split />} />
             <Route path="/compress" element={<Compress />} />

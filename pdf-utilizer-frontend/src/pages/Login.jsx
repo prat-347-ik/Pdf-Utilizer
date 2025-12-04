@@ -29,7 +29,8 @@ const Login = () => {
       localStorage.setItem("refreshToken", response.data.refresh_token); 
       localStorage.setItem("username", username); 
       
-      login(username);
+      login(response.data.user);
+
       setMessage({ type: "success", text: "Login successful! Redirecting..." });
       
       setTimeout(() => navigate("/dashboard"), 1000);

@@ -20,19 +20,18 @@ const generateTokens = (user) => {
   return { accessToken, refreshToken };
 };
 
-// Register Logic
 export const register = async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
-    // 1. Check if Email already exists
-    const existingEmail = await User.findOne({ where: { email } });
+    // 1. Check if Email already exists (Updated Syntax)
+    const existingEmail = await User.findOne({ email });
     if (existingEmail) {
       return res.status(400).json({ error: 'Email is already registered' });
     }
 
-    // 2. Check if Username already exists (THIS WAS MISSING)
-    const existingUsername = await User.findOne({ where: { username } });
+    // 2. Check if Username already exists (Updated Syntax)
+    const existingUsername = await User.findOne({ username });
     if (existingUsername) {
       return res.status(400).json({ error: 'Username is already taken' });
     }
@@ -41,7 +40,7 @@ export const register = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // 4. Create the user
+    // 4. Create the user (Mongoose supports create method similarly)
     await User.create({
       username,
       email,
@@ -50,35 +49,39 @@ export const register = async (req, res) => {
 
     res.status(201).json({ message: 'User registered successfully!' });
   } catch (error) {
-    console.error("Registration Error:", error); // Helpful for debugging
+    console.error("Registration Error:", error);
     res.status(500).json({ error: 'Server error during registration' });
   }
 };
 
-// Login Logic
 export const login = async (req, res) => {
   try {
     const { username, password } = req.body;
 
-    const user = await User.findOne({ where: { username } });
+    // Updated Syntax
+    const user = await User.findOne({ username });
     if (!user) return res.status(400).json({ error: 'Invalid credentials' });
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ error: 'Invalid credentials' });
 
-    // Generate Tokens
     const { accessToken, refreshToken } = generateTokens(user);
 
-    // Save Refresh Token to DB (for revocation support)
     user.refreshToken = refreshToken;
-    await user.save();
+    await user.save(); // Works the same in Mongoose
 
     res.json({ 
       message: 'Login successful',
       access_token: accessToken,
-      refresh_token: refreshToken, // Send to frontend
-      user: { username: user.username, email: user.email, plan: user.plan }
-    });
+      refresh_token: refreshToken,
+      // Note: user.id works in Mongoose (virtual getter for _id)
+      user: { 
+        username: user.username, 
+        email: user.email, 
+        plan: user.plan,
+        avatar: user.avatar,   // Added
+        fullName: user.fullName // Added
+      }    });
 
   } catch (error) {
     console.error(error);

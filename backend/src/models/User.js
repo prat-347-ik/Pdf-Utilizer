@@ -1,34 +1,50 @@
-import { DataTypes } from 'sequelize';
-import { sequelize } from '../config/db.js';
+import mongoose from 'mongoose';
 
-const User = sequelize.define('User', {
+const UserSchema = new mongoose.Schema({
   username: {
-    type: DataTypes.STRING(80),
-    allowNull: false,
-    unique: true
+    type: String,
+    required: true,
+    unique: true,
+    maxlength: 80
   },
   email: {
-    type: DataTypes.STRING(120),
-    allowNull: false,
-    unique: true
+    type: String,
+    required: true,
+    unique: true,
+    maxlength: 120
   },
   password: {
-    type: DataTypes.STRING(200),
-    allowNull: false
+    type: String,
+    required: true,
+    maxlength: 200
   },
-  // --- NEW FIELD ---
   refreshToken: {
-    type: DataTypes.TEXT,
-    allowNull: true
+    type: String,
+    default: null
   },
-  // ... (Keep your profile fields from previous steps if you added them)
-  fullName: { type: DataTypes.STRING(100), allowNull: true },
-  avatar: { type: DataTypes.STRING(255), allowNull: true },
-  role: { type: DataTypes.ENUM('user', 'admin'), defaultValue: 'user' },
-  plan: { type: DataTypes.ENUM('free', 'pro'), defaultValue: 'free' },
+  fullName: {
+    type: String,
+    maxlength: 100
+  },
+  avatar: {
+    type: String,
+    maxlength: 255
+  },
+  role: {
+    type: String,
+    enum: ['user', 'admin'],
+    default: 'user'
+  },
+  plan: {
+    type: String,
+    enum: ['free', 'pro'],
+    default: 'free'
+  }
 }, {
-  timestamps: true,
-  tableName: 'user'
+  timestamps: true // Adds createdAt and updatedAt automatically
 });
+
+// Mongoose models do not need manual sync()
+const User = mongoose.model('User', UserSchema);
 
 export default User;
