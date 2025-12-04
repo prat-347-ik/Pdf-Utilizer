@@ -5,43 +5,58 @@ import { AuthContext } from "../context/AuthContext"; // Import Context
 import { 
   Search, FilePlus, Scissors, FileText, Image, PenTool, 
   Shield, RotateCw, Volume2, Mic, Languages, FileArchive, 
-  Sparkles, Sun, Moon, Bot, FileDiff, EyeOff 
+  Sparkles, Sun, Moon, Bot, FileDiff, EyeOff, Settings, BrainCircuit 
 } from "lucide-react";
 
-// Tools config
+// Tools config - "Tetris" Layout to wrap around the Promo Card [0,0]
 const tools = [
-  { id: 1, name: "Merge PDFs", path: "/merge", description: "Combine files into one.", icon: <FilePlus size={32} />, color: "bg-purple-500", span: "col-span-2 row-span-2" },
-  {id: 2, name: "Split PDF", path: "/split", description: "Extract pages.", icon: <Scissors size={28} />, color: "bg-blue-500", span: "col-span-1 row-span-1" },
-  { id: 3, name: "Sign PDF", path: "/smart-sign", description: "Digitally sign docs.", icon: <PenTool size={28} />, color: "bg-emerald-500", span: "col-span-1 row-span-1" },
-  { id: 4, name: "Protect PDF", path: "/protect", description: "Encrypt with password.", icon: <Shield size={28} />, color: "bg-indigo-500", span: "col-span-1 row-span-2" },
+  // --- ROW 1 & 2 BLOCK (Wraps around Promo Card) ---
+  // Promo Card is at [0,0].
+  // We place Merge (2x2) at [0,1] effectively.
+  { id: 1, name: "Merge PDFs", path: "/merge", description: "Combine multiple files into one master document.", icon: <FilePlus size={32} />, color: "bg-purple-500", span: "col-span-2 row-span-2" },
+  
+  // Fills [0,3] (Top Right)
+  { id: 2, name: "Split PDF", path: "/split", description: "Extract pages.", icon: <Scissors size={28} />, color: "bg-blue-500", span: "col-span-1 row-span-1" },
+  
+  // Fills [1,0] (Under Promo Card)
   { id: 5, name: "Compress", path: "/compress", description: "Reduce file size.", icon: <FileArchive size={28} />, color: "bg-orange-500", span: "col-span-1 row-span-1" },
+  
+  // Fills [1,3] (Under Split)
   { id: 6, name: "Extract Text", path: "/extract-text", description: "Convert PDF to text.", icon: <FileText size={28} />, color: "bg-pink-500", span: "col-span-1 row-span-1" },
-  { id: 7, name: "Extract Images", path: "/extract-images", description: "Get images from PDF.", icon: <Image size={28} />, color: "bg-teal-500", span: "col-span-1 row-span-1" },
+
+  // --- ROW 3 & 4 BLOCK ---
+  // Chat takes Left Half (2x2)
+  { id: 11, name: "Chat with PDF", path: "/chat", description: "Analyze and ask questions to your documents using AI.", icon: <Bot size={32} />, color: "bg-gradient-to-br from-indigo-600 to-violet-600", span: "col-span-2 row-span-2" },
+  
+  // Diff takes Row 3 Right (2x1)
+  { id: 12, name: "Visual PDF Diff", path: "/diff", description: "Compare two versions side-by-side.", icon: <FileDiff size={32} />,color: "bg-violet-600", span: "col-span-2 row-span-1" },
+  
+  // Redact takes Row 4 Right (2x1)
+  { id: 13, name: "Smart Redact", path: "/redact", description: "Auto-detect & blackout PII.", icon: <EyeOff size={32} />, color: "bg-red-600", span: "col-span-2 row-span-1" },
+
+  // --- ROW 5 & 6 (Standard 1x1 Grid) ---
+  { id: 3, name: "Sign PDF", path: "/smart-sign", description: "Digitally sign docs.", icon: <PenTool size={28} />, color: "bg-emerald-500", span: "col-span-1 row-span-1" },
+  { id: 4, name: "Protect PDF", path: "/protect", description: "Encrypt with password.", icon: <Shield size={28} />, color: "bg-indigo-500", span: "col-span-1 row-span-1" },
   { id: 8, name: "Rotate PDF", path: "/rotate", description: "Fix orientation.", icon: <RotateCw size={28} />, color: "bg-cyan-500", span: "col-span-1 row-span-1" },
+  { id: 7, name: "Extract Images", path: "/extract-images", description: "Get images.", icon: <Image size={28} />, color: "bg-teal-500", span: "col-span-1 row-span-1" },
+  
   { id: 9, name: "Audiobook", path: "/audiobook", description: "Listen to PDFs.", icon: <Volume2 size={28} />, color: "bg-yellow-500", span: "col-span-1 row-span-1" },
   { id: 10, name: "Translate", path: "/translate", description: "Translate content.", icon: <Languages size={28} />, color: "bg-red-500", span: "col-span-1 row-span-1" },
-  { id: 11, name: "Chat with PDF", path: "/chat", description: "Ask questions to your AI assistant.", icon: <Bot size={32} />, color: "bg-gradient-to-br from-indigo-600 to-violet-600" },
-  { id: 12, name: "Visual PDF Diff", path: "/diff", description: "Compare two versions side-by-side & highlight changes.", icon: <FileDiff size={32} />,color: "bg-violet-600", span: "col-span-2 row-span-1" },
-  { id: 13, name: "Smart Redact", path: "/redact", description: "Auto-detect & blackout sensitive PII.", icon: <EyeOff size={32} />, color: "bg-red-600", span: "col-span-2 row-span-1" },
+  { id: 14, name: "Speech to Text", path: "/speech-to-text", description: "Transcribe audio.", icon: <Mic size={28} />, color: "bg-rose-500", span: "col-span-1 row-span-1" },
+  { id: 15, name: "Study Quiz", path: "/study-quiz", description: "Generate quizzes.", icon: <BrainCircuit size={28} />, color: "bg-fuchsia-500", span: "col-span-1 row-span-1" },
 ];
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  // Get loading state from context to prevent premature redirects
   const { user, isGuest, loading, logout } = useContext(AuthContext); 
   const [searchTerm, setSearchTerm] = useState("");
   const [darkMode, setDarkMode] = useState(false);
 
   useEffect(() => {
-    // 1. If AuthContext is still loading (checking localStorage), DO NOTHING.
     if (loading) return;
-
-    // 2. Once loading is done, if no user and not guest, redirect.
     if (!user && !isGuest) {
         navigate("/login");
     }
-    
-    // Theme check
     if (document.documentElement.classList.contains("dark")) setDarkMode(true);
   }, [user, isGuest, loading, navigate]);
 
@@ -56,11 +71,8 @@ export default function Dashboard() {
 
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good Morning" : hour < 18 ? "Good Afternoon" : "Good Evening";
-  
-  // FIX: Robust logic to prevent crash if user object exists but lacks username property
   const displayName = user?.username || "Guest";
 
-  // RENDER LOADING SPINNER if authentication is still being checked
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
@@ -72,6 +84,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 font-sans transition-colors duration-300 relative selection:bg-purple-500/30">
         
+        {/* Background Blobs */}
         <div className="fixed top-[-20%] right-[-10%] w-[600px] h-[600px] bg-purple-500/20 rounded-full blur-[120px] pointer-events-none z-0" />
         <div className="fixed bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-blue-500/20 rounded-full blur-[100px] pointer-events-none z-0" />
 
@@ -94,9 +107,13 @@ export default function Dashboard() {
                     </Link>
                 )}
                 
-                <button onClick={toggleTheme} className="p-3 rounded-full bg-white dark:bg-white/10 shadow-lg hover:scale-110 transition text-gray-800 dark:text-white">
+                <button onClick={toggleTheme} className="p-3 rounded-full bg-white dark:bg-white/10 shadow-lg hover:scale-110 transition text-gray-800 dark:text-white" title="Toggle Theme">
                     {darkMode ? <Sun size={20} /> : <Moon size={20} />}
                 </button>
+
+                <Link to="/settings" className="p-3 rounded-full bg-white dark:bg-white/10 shadow-lg hover:scale-110 transition text-gray-800 dark:text-white" title="Settings">
+                    <Settings size={20} />
+                </Link>
 
                 {!isGuest && (
                     <div onClick={logout} className="h-10 w-10 rounded-full bg-gradient-to-tr from-purple-500 to-pink-500 border-2 border-white shadow-lg cursor-pointer flex items-center justify-center text-white font-bold" title="Logout">
@@ -123,11 +140,10 @@ export default function Dashboard() {
             <div className="flex-1 px-8 pb-12">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 auto-rows-[180px]">
                 
-                {/* Promo Card */}
+                {/* PROMO CARD - FIXED AT [0,0] */}
                 <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                // OPTIMIZATION: will-change-transform helps browser optimization
                 className="will-change-transform col-span-1 row-span-1 bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl p-6 text-white shadow-xl flex flex-col justify-between border border-white/10"
                 >
                 <div className="flex justify-between items-start">
@@ -140,7 +156,7 @@ export default function Dashboard() {
                 </div>
                 </motion.div>
 
-                {/* Tool Cards */}
+                {/* DYNAMIC TOOLS */}
                 {filteredTools.map((tool, index) => (
                 <motion.div
                     key={tool.id}
@@ -159,7 +175,7 @@ export default function Dashboard() {
                         <h3 className="text-xl font-bold text-gray-800 dark:text-white group-hover:text-purple-500 transition-colors">
                         {tool.name}
                         </h3>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 opacity-80 group-hover:opacity-100">
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 opacity-80 group-hover:opacity-100 line-clamp-2">
                         {tool.description}
                         </p>
                     </div>
