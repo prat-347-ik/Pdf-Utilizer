@@ -34,7 +34,8 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors());
+const allowedOrigins = [process.env.FRONTEND_URL, "http://localhost:5173"];
+app.use(cors({ origin: allowedOrigins }));
 app.use(helmet());
 app.use(express.json());
 
