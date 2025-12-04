@@ -22,7 +22,7 @@ WORKDIR /app
 COPY package*.json ./
 COPY requirements.txt ./
 
-# 6. Install Node dependencies
+# 6. Install Node dependencie
 RUN npm install
 
 # 7. Install Python dependencies
