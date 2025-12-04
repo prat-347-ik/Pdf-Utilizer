@@ -28,6 +28,10 @@ RUN npm install
 # 7. Install Python dependencies
 RUN pip install -r requirements.txt
 
+# --- NEW STEP: Download Spacy NLP Model ---
+# This ensures the model is baked into the image
+RUN python -m spacy download en_core_web_lg
+
 # 8. Copy the rest of your backend code
 COPY . .
 
