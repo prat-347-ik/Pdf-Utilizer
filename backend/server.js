@@ -59,6 +59,7 @@ app.use('/api/quiz', quizRoutes);
 // This creates the endpoint: GET http://localhost:5000/user
 app.use('/user', userRoutes);
 
+
 app.get('/', (req, res) => {
   res.send('PDF Utilizer Backend is Running!');
 });

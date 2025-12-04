@@ -12,6 +12,7 @@ export const loginUser = (credentials) => api.post("/auth/login", credentials);
 export const registerUser = (userData) => api.post("/auth/register", userData);
 export const logoutUser = () => api.post("/auth/logout");
 
+
 // --- USER & SETTINGS APIs ---
 export const fetchUserProfile = async (token) => {
   const response = await api.get("/user/profile", {
@@ -20,13 +21,32 @@ export const fetchUserProfile = async (token) => {
   return response.data;
 };
 
+// Update Profile: Handle JSON or FormData
 export const updateUserProfile = async (data, token) => {
+  const isFormData = data instanceof FormData;
   const response = await api.put("/user/profile", data, {
+    headers: { 
+      Authorization: `Bearer ${token}`,
+      'Content-Type': isFormData ? 'multipart/form-data' : 'application/json'
+    }
+  });
+  return response.data;
+};
+
+// Security APIs
+export const changeUserPassword = async (passwords, token) => {
+  const response = await api.put("/user/change-password", passwords, {
     headers: { Authorization: `Bearer ${token}` }
   });
   return response.data;
 };
 
+export const deleteUserAccount = async (token) => {
+  const response = await api.delete("/user/delete-account", {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  return response.data;
+};
 export const updateUserPlan = async (plan, token) => {
   const response = await api.put("/user/plan", { plan }, {
     headers: { Authorization: `Bearer ${token}` }

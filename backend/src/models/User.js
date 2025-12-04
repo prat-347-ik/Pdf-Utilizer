@@ -30,6 +30,17 @@ const UserSchema = new mongoose.Schema({
     type: String,
     maxlength: 255
   },
+
+  // NEW: Extended Profile Details
+  bio: { type: String, maxlength: 500 },
+  jobTitle: { type: String, maxlength: 100 },
+  company: { type: String, maxlength: 100 },
+
+  // NEW: Preferences
+  preferences: {
+    theme: { type: String, enum: ['light', 'dark', 'system'], default: 'system' },
+    notifications: { type: Boolean, default: true }
+  },
   role: {
     type: String,
     enum: ['user', 'admin'],
