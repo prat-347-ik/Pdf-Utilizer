@@ -1,34 +1,58 @@
-import express from 'express';
-import upload from '../middleware/uploadMiddleware.js'; 
-import { identifyUser, checkPlanLimits } from '../middleware/authMiddleware.js'; // Import new middleware
-import { 
-  mergePDFs, splitPDF, rotatePDF, protectPDF,
-  compressPDF, extractText, extractImages, signPDF
-} from '../controllers/pdfController.js';
+import jwt from 'jsonwebtoken';
+import User from '../models/User.js';
+import fs from 'fs';
 
-const router = express.Router();
+// 1. Middleware to check token and set req.user (Does not block guests)
+export const identifyUser = async (req, res, next) => {
+  const token = req.header('Authorization')?.replace('Bearer ', '');
 
-// Apply identification globally to this router (or per route)
-router.use(identifyUser);
+  if (!token) {
+    req.user = null; // Guest Mode
+    return next();
+  }
 
-// Helper to wrap upload + limit check
-const processUpload = (fieldName) => [
-  upload.single(fieldName),
-  checkPlanLimits
-];
+  try {
+    const decoded = jwt.verify(token, process.env.SECRET_KEY);
+    const user = await User.findByPk(decoded.id);
+    req.user = user; // Authenticated User
+  } catch (err) {
+    console.error("Token verification failed:", err.message);
+    req.user = null; // Treat invalid token as guest
+  }
+  next();
+};
 
-router.post('/merge', upload.array('files', 10), checkPlanLimits, mergePDFs); // Array handled slightly differently in logic, but checkPlanLimits logic might need slight tweak for arrays if strict.
-router.post('/split', processUpload('file'), splitPDF);
-router.post('/rotate', processUpload('file'), rotatePDF);
-router.post('/protect', processUpload('file'), protectPDF);
-router.post('/compress', processUpload('file'), compressPDF);
-router.post('/extract-text', processUpload('file'), extractText);
-router.post('/extract-images', processUpload('file'), extractImages);
+// 2. Middleware to enforce Plan Limits
+export const checkPlanLimits = (req, res, next) => {
+  const file = req.file;
+  if (!file) return next(); // No file to check (or handled by multer error)
 
-router.post('/sign', 
-  upload.fields([{ name: 'file', maxCount: 1 }, { name: 'signature', maxCount: 1 }]),
-  checkPlanLimits, // Checks the main file size
-  signPDF
-);
+  const fileSizeMB = file.size / (1024 * 1024);
 
-export default router;
+  // --- GUEST LIMITS ---
+  if (!req.user) {
+    const GUEST_LIMIT_MB = 5; 
+    if (fileSizeMB > GUEST_LIMIT_MB) {
+      // Delete the file immediately to save space
+      fs.unlinkSync(file.path);
+      return res.status(403).json({ 
+        error: `Guests are limited to ${GUEST_LIMIT_MB}MB files. Please create a free account for more.` 
+      });
+    }
+    return next();
+  }
+
+  // --- FREE PLAN LIMITS ---
+  if (req.user.plan === 'free') {
+    const FREE_LIMIT_MB = 20;
+    if (fileSizeMB > FREE_LIMIT_MB) {
+      fs.unlinkSync(file.path);
+      return res.status(403).json({ 
+        error: `Free plan limited to ${FREE_LIMIT_MB}MB. Upgrade to Pro for unlimited size.` 
+      });
+    }
+  }
+
+  // --- PRO PLAN (Unlimited) ---
+  next();
+};

@@ -14,8 +14,11 @@ const connectDB = async () => {
     await sequelize.authenticate();
     console.log('✅ PostgreSQL Connected Successfully.');
     
-    await sequelize.sync(); 
-    console.log('✅ Database Synced.');
+    // --- CHANGE THIS LINE ---
+    // force: true drops the tables and re-creates them. 
+    // This fixes the "column contains null values" error.
+    await sequelize.sync({ force: true }); 
+    console.log('✅ Database Synced .');
     
   } catch (error) {
     console.error('❌ Database Connection Failed:', error);

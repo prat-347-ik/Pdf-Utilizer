@@ -25,18 +25,24 @@ export const register = async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
-    // 1. Check if user already exists
-    const existingUser = await User.findOne({ where: { email } });
-    if (existingUser) {
-      return res.status(400).json({ error: 'User already exists' });
+    // 1. Check if Email already exists
+    const existingEmail = await User.findOne({ where: { email } });
+    if (existingEmail) {
+      return res.status(400).json({ error: 'Email is already registered' });
     }
 
-    // 2. Hash the password (Security)
+    // 2. Check if Username already exists (THIS WAS MISSING)
+    const existingUsername = await User.findOne({ where: { username } });
+    if (existingUsername) {
+      return res.status(400).json({ error: 'Username is already taken' });
+    }
+
+    // 3. Hash the password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // 3. Create the user in Database
-    const newUser = await User.create({
+    // 4. Create the user
+    await User.create({
       username,
       email,
       password: hashedPassword
@@ -44,7 +50,7 @@ export const register = async (req, res) => {
 
     res.status(201).json({ message: 'User registered successfully!' });
   } catch (error) {
-    console.error(error);
+    console.error("Registration Error:", error); // Helpful for debugging
     res.status(500).json({ error: 'Server error during registration' });
   }
 };
