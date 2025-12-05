@@ -7,6 +7,7 @@ import remarkGfm from 'remark-gfm';
 
 import ModernSidebar from '../components/ModernSidebar';
 import ModernHeader from '../components/ModernHeader';
+import api from '../api/apiService'; // ✅ Import the configured Axios instance
 
 const ChatWithPdf = () => {
   const navigate = useNavigate();
@@ -28,11 +29,11 @@ const ChatWithPdf = () => {
     formData.append('file', selectedFile);
 
     try {
-      const response = await fetch('http://localhost:5000/api/chat/init', {
-        method: 'POST',
-        body: formData,
-      });
-      const data = await response.json();
+      // ✅ Use api.post instead of fetch
+      // Axios automatically sets the Content-Type to multipart/form-data for FormData
+      const response = await api.post('/api/chat/init', formData);
+      const data = response.data;
+
       if (data.success) {
         setSessionId(data.sessionId);
         setMessages([{ role: 'system', text: `Ready to chat with ${selectedFile.name}!` }]);
@@ -41,6 +42,7 @@ const ChatWithPdf = () => {
       }
     } catch (error) {
       console.error("Upload failed", error);
+      alert("Upload failed. Please check the connection.");
     } finally {
       setUploading(false);
     }
@@ -56,12 +58,13 @@ const ChatWithPdf = () => {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:5000/api/chat/ask', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId, question: userMsg.text }),
+      // ✅ Use api.post instead of fetch
+      // Axios automatically handles JSON stringification and headers
+      const response = await api.post('/api/chat/ask', { 
+        sessionId, 
+        question: userMsg.text 
       });
-      const data = await response.json();
+      const data = response.data;
       
       const botMsg = { 
         role: 'bot', 
@@ -71,7 +74,8 @@ const ChatWithPdf = () => {
       setMessages(prev => [...prev, botMsg]);
 
     } catch (error) {
-      setMessages(prev => [...prev, { role: 'system', text: "Error fetching answer." }]);
+      console.error("Chat error:", error);
+      setMessages(prev => [...prev, { role: 'system', text: "Error fetching answer. Please try again." }]);
     } finally {
       setLoading(false);
     }
@@ -84,14 +88,12 @@ const ChatWithPdf = () => {
       <ModernSidebar />
 
       {/* 2. Main Content Wrapper */}
-      {/* ✅ ADDED pl-20 (80px) to prevent sidebar overlap */}
       <div className="flex-1 flex flex-col min-w-0 pl-20 relative h-screen">
         
         {/* Dynamic Header */}
         <ModernHeader title="Chat with PDF" />
 
         {/* 3. Tool Workspace */}
-        {/* Height calculation ensures it fills exactly the remaining space */}
         <main className="flex-1 flex gap-6 p-6 overflow-hidden h-full">
           
           {/* Left Panel: File Manager */}
