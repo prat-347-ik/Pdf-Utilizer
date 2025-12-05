@@ -1,9 +1,15 @@
 import { spawn } from 'child_process';
 import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Add these lines to get __dirname in ES Modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export const runPythonScript = (operation, payload) => {
   return new Promise((resolve, reject) => {
-    const scriptPath = path.resolve('services/pdf_processor.py'); 
+    // Adjust '../..' depending on where pythonService.js is located relative to pdf_processor.py
+const scriptPath = path.join(__dirname, '../../services/pdf_processor.py');
     
     // ✅ FIX: Removed the 'env' option. Let Python handle encoding internally.
     const pythonProcess = spawn('python3', [scriptPath, operation, JSON.stringify(payload)]);
