@@ -37,7 +37,7 @@ const PORT = process.env.PORT || 5000;
 // Replace "app.use(cors());" with this:
 const allowedOrigins = [
   "http://localhost:5173",                  // Local Development
-  "https://pdf-utilizer.netlify.app/"      // ⚠️ PASTE YOUR NETLIFY URL HERE
+  "https://pdf-utilizer.netlify.app"      // ⚠️ PASTE YOUR NETLIFY URL HERE
 ]
 ;
 app.use(cors({
