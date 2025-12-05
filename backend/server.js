@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import morgan from 'morgan'; // 1. Import Morgan
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url'; 
@@ -33,6 +34,8 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+// 'dev' format gives you: Method, URL, Status Code, Response Time
+app.use(morgan('dev'));
 
 // Replace "app.use(cors());" with this:
 const allowedOrigins = [

@@ -38,8 +38,7 @@ RUN pip install https://github.com/explosion/spacy-models/releases/download/en_c
 COPY . .
 
 # 9. Create the uploads folder manually to be safe
-RUN mkdir -p uploads
-
+RUN mkdir -p uploads && chmod 777 uploads
 # 10. Expose the port your app runs on
 EXPOSE 5000
 
