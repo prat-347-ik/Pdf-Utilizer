@@ -8,11 +8,15 @@ const __dirname = path.dirname(__filename);
 
 export const runPythonScript = (operation, payload) => {
   return new Promise((resolve, reject) => {
-    // ✅ Fix: Go up two levels from 'src/services' to 'backend' then into 'services'
-    // This finds the python file regardless of where you start the server
+    // Correct path resolution
     const scriptPath = path.join(__dirname, '../../services/pdf_processor.py'); 
     
-    const pythonProcess = spawn('python3', [scriptPath, operation, JSON.stringify(payload)]);
+    // 🔍 DYNAMIC COMMAND SELECTION
+    // If we are on Windows ('win32'), use 'python'
+    // If we are on Linux/Mac/Render, use 'python3'
+    const pythonCommand = process.platform === 'win32' ? 'python' : 'python3';
+
+    const pythonProcess = spawn(pythonCommand, [scriptPath, operation, JSON.stringify(payload)]);
 
     let dataString = '';
     let errorString = '';
@@ -27,7 +31,6 @@ export const runPythonScript = (operation, payload) => {
 
     pythonProcess.on('close', (code) => {
       if (code !== 0 && errorString) {
-        // This will now show up in your logs if you catch it in the controller
         return reject(new Error(`Python Script Error: ${errorString}`));
       }
       try {

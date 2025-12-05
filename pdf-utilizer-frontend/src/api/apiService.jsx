@@ -145,4 +145,11 @@ export const generateQuiz = (formData) =>
     },
 });
 
+// --- Chat with PDF APIs ---
+export const initChat = (formData) => api.post("/api/chat/init", formData, {
+    headers: { 'Content-Type': 'multipart/form-data' } 
+});
+
+export const askChat = (data) => api.post("/api/chat/ask", data);
+
 export default api;
