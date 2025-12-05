@@ -1,12 +1,25 @@
 import sys
 import fitz  # PyMuPDF
 from presidio_analyzer import AnalyzerEngine
+from presidio_analyzer.nlp_engine import NlpEngineProvider # 1. Import Provider
 
-# Initialize engine
-analyzer = AnalyzerEngine()
+# --- CONFIGURATION FOR LOW MEMORY (Fixes 502 Error) ---
+# We explicitly tell Presidio to use the 'sm' (Small) model instead of 'lg'
+configuration = {
+    "nlp_engine_name": "spacy",
+    "models": [{"lang_code": "en", "model_name": "en_core_web_sm"}],
+}
+
+# Initialize the NLP engine with our small model config
+provider = NlpEngineProvider(nlp_configuration=configuration)
+nlp_engine = provider.create_engine()
+
+# Pass the custom engine to the Analyzer
+analyzer = AnalyzerEngine(nlp_engine=nlp_engine, supported_languages=["en"])
+# ------------------------------------------------------
 
 def redact_pdf_stream(input_path, entities_to_redact=None):
-    # Log to stderr (so it doesn't corrupt the PDF output)
+    # Log to stderr to avoid corrupting the stdout PDF stream
     print(f"Processing: {input_path}", file=sys.stderr)
 
     if entities_to_redact is None:
@@ -30,9 +43,14 @@ def redact_pdf_stream(input_path, entities_to_redact=None):
 
         # Apply Redaction
         for pii_text in redaction_candidates:
+            # Search for the text in the PDF
             areas = page.search_for(pii_text)
+            
+            # Add redaction annotation (black box)
             for area in areas:
                 page.add_redact_annot(area, fill=(0, 0, 0)) 
+        
+        # Commit the redactions to the page
         page.apply_redactions()
 
     # STREAM RESULT: Write bytes directly to standard output
@@ -54,6 +72,7 @@ if __name__ == "__main__":
         try:
             redact_pdf_stream(input_file, pii_types)
         except Exception as e:
+            # Print error to stderr so it doesn't crash the Node.js stream
             print(f"Error: {str(e)}", file=sys.stderr)
             sys.exit(1)
     else:

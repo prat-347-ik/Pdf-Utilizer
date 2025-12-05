@@ -32,8 +32,8 @@ RUN pip install -r requirements.txt
 # --- UPDATED STEP: Install Spacy Model directly via PIP ---
 # We replace the 'python -m spacy download' command with this direct link.
 # This bypasses the downloader glitch.
-RUN pip install https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-3.7.1/en_core_web_lg-3.7.1-py3-none-any.whl
-
+# The large model (580MB) crashes the free tier memory. The small model (12MB) works perfectly.
+RUN pip install https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl
 # 8. Copy the rest of your backend code
 COPY . .
 
