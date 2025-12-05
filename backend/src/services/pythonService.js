@@ -6,7 +6,7 @@ export const runPythonScript = (operation, payload) => {
     const scriptPath = path.resolve('services/pdf_processor.py'); 
     
     // ✅ FIX: Removed the 'env' option. Let Python handle encoding internally.
-    const pythonProcess = spawn('python', [scriptPath, operation, JSON.stringify(payload)]);
+    const pythonProcess = spawn('python3', [scriptPath, operation, JSON.stringify(payload)]);
 
     let dataString = '';
     let errorString = '';
