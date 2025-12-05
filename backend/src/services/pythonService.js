@@ -2,16 +2,16 @@ import { spawn } from 'child_process';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-// Add these lines to get __dirname in ES Modules
+// Define __dirname for ES Modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export const runPythonScript = (operation, payload) => {
   return new Promise((resolve, reject) => {
-    // Adjust '../..' depending on where pythonService.js is located relative to pdf_processor.py
-const scriptPath = path.join(__dirname, '../../services/pdf_processor.py');
+    // ✅ Fix: Go up two levels from 'src/services' to 'backend' then into 'services'
+    // This finds the python file regardless of where you start the server
+    const scriptPath = path.join(__dirname, '../../services/pdf_processor.py'); 
     
-    // ✅ FIX: Removed the 'env' option. Let Python handle encoding internally.
     const pythonProcess = spawn('python3', [scriptPath, operation, JSON.stringify(payload)]);
 
     let dataString = '';
@@ -27,6 +27,7 @@ const scriptPath = path.join(__dirname, '../../services/pdf_processor.py');
 
     pythonProcess.on('close', (code) => {
       if (code !== 0 && errorString) {
+        // This will now show up in your logs if you catch it in the controller
         return reject(new Error(`Python Script Error: ${errorString}`));
       }
       try {
@@ -37,7 +38,7 @@ const scriptPath = path.join(__dirname, '../../services/pdf_processor.py');
           reject(new Error(response.error || 'Unknown error from Python script'));
         }
       } catch (err) {
-        reject(new Error(`Failed to parse Python output: ${dataString}`));
+        reject(new Error(`Failed to parse Python output: ${dataString}. Error: ${errorString}`));
       }
     });
   });

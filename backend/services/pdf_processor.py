@@ -3,23 +3,11 @@ import io
 import json
 import os
 
+# Set encoding to handle special characters
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
-#  Import the translate function
 
-from translate_utils import translate_pdf, translate_text_content
-
-# Import the new tts function
-from tts_utils import text_to_speech
-
-# Import RAG functions
-from rag_utils import ingest_pdf, ask_pdf
-
-# Import quiz functions
-from quiz_utils import extract_text_for_quiz, generate_quiz_json
-
-
-# Import functions from your provided utils file
+# ✅ KEEP LIGHTWEIGHT IMPORTS AT THE TOP
 from pdf_utils import (
     merge_pdfs, split_pdf, rotate_pdf, protect_pdf, 
     compress_pdf, extract_text_from_pdf, extract_images_from_pdf, 
@@ -27,7 +15,6 @@ from pdf_utils import (
 )
 
 def send_response(success, data=None, error=None):
-    """Helper to print JSON to stdout for Node.js to capture."""
     print(json.dumps({"success": success, "data": data, "error": error}))
 
 def main():
@@ -46,7 +33,6 @@ def main():
 
         # --- 2. SPLIT ---
         elif operation == "split":
-            # Ensure pages are integers
             pages = [int(p) for p in payload['pages']]
             result = split_pdf(payload['file'], pages, payload['output_folder'])
             if "error" in result: raise Exception(result['error'])
@@ -54,7 +40,6 @@ def main():
 
         # --- 3. ROTATE ---
         elif operation == "rotate":
-            # Convert keys to integers because JSON keys are always strings
             rotations = {int(k): int(v) for k, v in payload['rotations'].items()}
             result = rotate_pdf(payload['file'], payload['output'], rotations)
             if "error" in result: raise Exception(result['error'])
@@ -75,7 +60,6 @@ def main():
         # --- 6. EXTRACT TEXT ---
         elif operation == "extract_text":
             text = extract_text_from_pdf(payload['file'])
-            # Check if function returned an error string starting with "Error"
             if text.startswith("Error"): raise Exception(text)
             send_response(True, data={"text": text})
 
@@ -87,78 +71,70 @@ def main():
             
         # --- 8. CREATE PDF FROM TEXT ---
         elif operation == "create_from_text":
-             # Your utils function doesn't return anything on success, so we catch exceptions
             create_pdf_from_text(payload['text'], payload['output'])
             send_response(True, data={"filePath": payload['output']})
 
         # --- 9. SIGN ---
         elif operation == "sign":
             result = sign_pdf(
-           payload['file'], 
-           payload['output'], 
-           payload['signature_img'], 
-           int(payload['page']), 
-           tuple(payload['position']),
-           payload.get('all_pages', False) # ✅ Get flag, default to False
-           )
+                payload['file'], 
+                payload['output'], 
+                payload['signature_img'], 
+                int(payload['page']), 
+                tuple(payload['position']),
+                payload.get('all_pages', False)
+            )
             if "error" in result: raise Exception(result['error'])
             send_response(True, data={"filePath": result['output_file']})
 
-        # --- 10. TRANSLATE ---
+        # --- 10. TRANSLATE (HEAVY IMPORT) ---
         elif operation == "translate":
-            # Payload: { "file": "...", "output": "...", "lang": "es" }
-            result = translate_pdf(
-                payload['file'], 
-                payload['output'], 
-                payload['lang']
-            )
+            # 🔴 Lazy Import: Only load this if user asks for translation
+            from translate_utils import translate_pdf
+            result = translate_pdf(payload['file'], payload['output'], payload['lang'])
             if "error" in result: raise Exception(result['error'])
             send_response(True, data={"filePath": result['output_path']})
 
+        # --- 11. TTS (HEAVY IMPORT) ---
         elif operation == "tts":
-            # 1. Extract Text
+            # 🔴 Lazy Import
+            from translate_utils import translate_text_content
+            from tts_utils import text_to_speech
+            
             text_content = extract_text_from_pdf(payload['file'])
             if not text_content or text_content.strip() == "":
                 raise Exception("Could not extract text from this PDF.")
             
-            # 2. Get Target Language
             target_lang = payload.get('lang', 'en')
-
-            # 3. TRANSLATE TEXT (The Fix)
-            # This converts "Hello" -> "नमस्ते" if lang is 'hi'
-            # If lang is 'en', it just cleans up the English text
             final_text = translate_text_content(text_content, target_lang)
-            
-            # 4. Convert to Audio
             text_to_speech(final_text, payload['output'], target_lang)
-            
             send_response(True, data={"filePath": payload['output']}) 
 
-        # --- 11. RAG INGEST (Start Chat) ---
+        # --- 12. RAG INGEST (HEAVY IMPORT) ---
         elif operation == "rag_ingest":
-            # Payload: { "file": "...", "index_id": "..." }
+            # 🔴 Lazy Import
+            from rag_utils import ingest_pdf
             result = ingest_pdf(payload['file'], payload['index_id'])
             if "error" in result: raise Exception(result['error'])
             send_response(True, data=result)
 
-        # --- 12. RAG QUERY (Ask Question) ---
+        # --- 13. RAG QUERY (HEAVY IMPORT) ---
         elif operation == "rag_query":
-            # Payload: { "query": "...", "index_id": "..." }
+            # 🔴 Lazy Import
+            from rag_utils import ask_pdf
             result = ask_pdf(payload['query'], payload['index_id'])
             if "error" in result: raise Exception(result['error'])
             send_response(True, data=result)    
 
-        # --- 13. GENERATE QUIZ ---
+        # --- 14. GENERATE QUIZ (HEAVY IMPORT) ---
         elif operation == "generate_quiz":
-            # 1. Extract Text
+            # 🔴 Lazy Import
+            from quiz_utils import extract_text_for_quiz, generate_quiz_json
+            
             text_content = extract_text_for_quiz(payload['file'])
             if len(text_content) < 100:
                 raise Exception("PDF text is too short to generate a quiz.")
-
-            # 2. Get JSON Data (Questions + Explanations)
             quiz_data = generate_quiz_json(text_content)
-            
-            # 3. Send JSON back to Node.js (No PDF creation)
             send_response(True, data={"quiz": quiz_data})  
 
         else:

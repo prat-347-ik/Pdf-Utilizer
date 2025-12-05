@@ -17,10 +17,13 @@ export const mergePDFs = async (req, res) => {
         const filePaths = req.files.map(f => path.resolve(f.path));
         const outputPath = path.resolve(`uploads/merged_${Date.now()}.pdf`);
 
-        const result = await runPythonScript('merge', { files: filePaths, output: outputPath });
-
+const result = await runPythonScript('merge', { files: filePaths, output: outputPath });
         res.download(result.filePath, 'merged.pdf', () => cleanup([...filePaths, result.filePath]));
-    } catch (e) { res.status(500).json({ error: e.message }); }
+    } catch (e) { 
+        // 🔍 ADD THIS LOGGING
+        console.error("❌ Merge Error Details:", e); 
+        res.status(500).json({ error: e.message }); 
+    }
 };
 
 export const splitPDF = async (req, res) => {
