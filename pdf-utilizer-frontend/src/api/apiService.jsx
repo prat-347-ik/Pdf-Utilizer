@@ -147,7 +147,8 @@ export const generateQuiz = (formData) =>
 
 // --- Chat with PDF APIs ---
 export const initChat = (formData) => api.post("/api/chat/init", formData, {
-    headers: { 'Content-Type': 'multipart/form-data' } 
+    headers: { 'Content-Type': 'multipart/form-data' },
+    timeout: 120000 // Wait up to 120 seconds (2 minutes)
 });
 
 export const askChat = (data) => api.post("/api/chat/ask", data);

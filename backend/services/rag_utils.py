@@ -38,34 +38,41 @@ def get_embeddings():
         from langchain_community.embeddings import HuggingFaceEmbeddings
         return HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
 
+# ... existing imports ...
+
 def ingest_pdf(file_path, index_id):
     try:
-        print(f"🔍 DEBUG: Starting ingestion.", file=sys.stderr)
-        print(f"🔍 DEBUG: Input File: {file_path}", file=sys.stderr)
+        print(f"Starting ingestion for file: {file_path}", file=sys.stderr)
 
+        # 1. Load PDF
         loader = PyMuPDFLoader(file_path)
         documents = loader.load()
         if not documents:
             return {"error": "PDF could not be loaded or is empty."}
+            
+        print(f"PDF Loaded. Total Pages: {len(documents)}", file=sys.stderr)
 
-        text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+        # 🛑 OPTIMIZATION 1: Limit Pages for Free Tier Stability
+        # Process max 15 pages to prevent Timeout/Crash
+        MAX_PAGES = 15
+        if len(documents) > MAX_PAGES:
+            print(f"⚠️ Limit reached. Processing first {MAX_PAGES} pages only.", file=sys.stderr)
+            documents = documents[:MAX_PAGES]
+
+        # 🛑 OPTIMIZATION 2: Increase Chunk Size (Fewer API Calls = Faster)
+        # 1000 -> 4000 reduces API calls by 4x
+        text_splitter = RecursiveCharacterTextSplitter(chunk_size=4000, chunk_overlap=400)
         chunks = text_splitter.split_documents(documents)
-        
+        print(f"Text Split into {len(chunks)} chunks.", file=sys.stderr)
+
+        # 3. Create Vector Store (Auto-switches based on env)
         embeddings = get_embeddings()
         vector_store = FAISS.from_documents(chunks, embeddings)
         
-        # Save to Disk
+        # 4. Save to Disk
         save_path = os.path.join(INDEX_FOLDER, index_id)
-        # 🔍 DEBUG: Print the exact save path
-        print(f"🔍 DEBUG: Saving Index to: {save_path}", file=sys.stderr)
-        
         vector_store.save_local(save_path)
-        
-        # Double check if it actually saved
-        if os.path.exists(save_path):
-             print(f"✅ DEBUG: Index folder created successfully at {save_path}", file=sys.stderr)
-        else:
-             print(f"❌ DEBUG: FAILED to create index folder at {save_path}", file=sys.stderr)
+        print(f"Index saved successfully to {save_path}", file=sys.stderr)
 
         return {"status": "success", "chunks": len(chunks), "index_id": index_id}
 
@@ -73,6 +80,8 @@ def ingest_pdf(file_path, index_id):
         print(f"ERROR in ingest_pdf: {str(e)}", file=sys.stderr)
         traceback.print_exc(file=sys.stderr)
         return {"error": f"Ingestion failed: {str(e)}"}
+
+# ... rest of the file (ask_pdf, etc) ...
 
 def ask_pdf(query, index_id):
     try:
