@@ -109,7 +109,7 @@ def ask_pdf(query, index_id):
              return {"error": "Missing GOOGLE_API_KEY"}
 
         llm = ChatGoogleGenerativeAI(
-            model="gemini-1.5-flash",
+            model="gemini-flash-latest",
             temperature=0.3,
             google_api_key=api_key
         )
