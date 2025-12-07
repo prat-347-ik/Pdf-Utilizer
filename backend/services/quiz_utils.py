@@ -2,7 +2,7 @@ import os
 import json
 import fitz  # PyMuPDF
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain.schema import HumanMessage
+from langchain_core.messages import HumanMessage  # <--- FIX 1: Updated Import
 
 def extract_text_for_quiz(file_path):
     """Extracts text from PDF, limiting size to avoid token limits."""
@@ -27,10 +27,12 @@ def generate_quiz_json(text_content):
         raise Exception("GOOGLE_API_KEY is missing in environment variables.")
 
     llm = ChatGoogleGenerativeAI(
-        model="gemini-2.0-flash", 
+        model="gemini-flash-latest",  # <--- FIX 2: Use the stable model alias
         temperature=0.3,
         google_api_key=api_key
     )
+
+    # ... (rest of the file remains the same)
 
     # UPDATED PROMPT: Requesting 'id', 'correctAnswer', and 'explanation'
     prompt = f"""
