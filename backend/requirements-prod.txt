@@ -34,3 +34,6 @@ presidio-analyzer
 presidio-anonymizer
 langchain-google-genai
 langchain-text-splitters
+gTTS==2.5.1
+SpeechRecognition==3.10.3
+pydub==0.25.1
