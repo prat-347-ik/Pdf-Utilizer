@@ -109,20 +109,27 @@ def ask_pdf(query, index_id):
              return {"error": "Missing GOOGLE_API_KEY"}
 
         llm = ChatGoogleGenerativeAI(
-            model="gemini-2.0-flash",
+            model="gemini-2.0-flash-lite",
             temperature=0.3,
             google_api_key=api_key
         )
         
-        prompt = f"""You are a helpful PDF assistant. Use the context below to answer the user's question accurately.
-        
-        Context:
+        prompt = f"""
+        **ROLE**: You are an expert PDF analysis and summarization assistant. Your task is to provide clear, concise, and accurate answers to the user's question based *only* on the provided context.
+
+        **CONTEXT**:
         {context_text}
         
-        Question: 
+        **INSTRUCTIONS**:
+        1. **Strictly adhere** to the information provided in the CONTEXT above. Do not use outside knowledge.
+        2. If the answer cannot be found in the provided CONTEXT, you **must** state: "I apologize, but the required information is not available in the document."
+        3. Do not mention that the answer came from the context or the document; simply state the answer directly.
+        4. If the question is a "how-to" or requests a list, use bullet points or numbered lists for clarity.
+
+        **USER QUESTION**: 
         {query}
         
-        Answer:"""
+        **ANSWER**:"""
         
         response = llm.invoke(prompt)
         

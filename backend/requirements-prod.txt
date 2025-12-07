@@ -10,7 +10,6 @@ defusedxml==0.7.1
 Flask==3.1.2
 flask-cors==6.0.1
 fonttools==4.61.0
-fpdf==1.7.2
 fpdf2==2.8.5
 idna==3.11
 itsdangerous==2.2.0
