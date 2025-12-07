@@ -21,12 +21,18 @@ export const runPythonScript = (operation, payload) => {
     let dataString = '';
     let errorString = '';
 
+// ✅ FIX 1: Stream stdout to console immediately
     pythonProcess.stdout.on('data', (data) => {
-      dataString += data.toString();
+      const output = data.toString();
+      console.log(`[Python Output]: ${output}`); // <--- Add this
+      dataString += output;
     });
 
+// ✅ FIX 2: Stream stderr (errors/logs) to console immediately
     pythonProcess.stderr.on('data', (data) => {
-      errorString += data.toString();
+      const errorOutput = data.toString();
+      console.error(`[Python Log]: ${errorOutput}`); // <--- Add this
+      errorString += errorOutput;
     });
 
     pythonProcess.on('close', (code) => {
