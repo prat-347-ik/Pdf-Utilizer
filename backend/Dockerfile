@@ -32,7 +32,7 @@ RUN npm install
 
 # 7. Install Python dependencies (Use lightweight prod file)
 COPY requirements-prod.txt ./requirements.txt
-RUN pip install -r requirements.tx
+RUN pip install -r requirements.txt
 
 # --- NEW STEP: Download Spacy NLP Model ---
 # --- UPDATED STEP: Install Spacy Model directly via PIP ---
