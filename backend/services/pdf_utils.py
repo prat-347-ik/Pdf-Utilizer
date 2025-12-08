@@ -1,14 +1,24 @@
 import os
-from PyPDF2 import PdfReader, PdfWriter, PdfMerger
-import json
-from PIL import Image
+import sys  
 import io
+import fitz  # PyMuPDF
+import re  # <--- NEW: Added for text cleaning regex
+from PyPDF2 import PdfReader, PdfWriter, PdfMerger
+from PIL import Image
+from fpdf import FPDF
 
 
 from fpdf import FPDF
 
-import os
-from fpdf import FPDF
+
+# Import OCR libraries
+try:
+    import pytesseract
+    from pdf2image import convert_from_path
+    OCR_AVAILABLE = True
+except ImportError:
+    OCR_AVAILABLE = False
+    print("Warning: OCR libraries (pytesseract, pdf2image) not found. Fallback mode disabled.")
 
 def create_pdf_from_text(text, output_pdf_path):
     """
@@ -109,18 +119,6 @@ def merge_pdfs(pdf_list, output_path):
     finally:
         merger.close()
 
-
-
-
-
-import fitz  # PyMuPDF
-from PIL import Image
-import io
-
-import fitz  # PyMuPDF
-from PIL import Image
-import io
-import sys
 
 def compress_pdf(input_pdf_path, output_pdf_path, compression_level="medium"):
     """
@@ -224,21 +222,66 @@ def compress_pdf(input_pdf_path, output_pdf_path, compression_level="medium"):
         # DO NOT PRINT to stdout here, it breaks the JSON response
         return {"error": f"Error compressing PDF: {str(e)}"}
 
+def clean_extracted_text(text):
+    """
+    Post-processes extracted text to fix broken lines and hyphenation.
+    """
+    if not text:
+        return ""
+
+    # 1. Fix hyphenated words at line ends (e.g. "exam-\nple" -> "example")
+    # Matches a word character, hyphen, newline, then another word character
+    text = re.sub(r'(\w+)-\n(\w+)', r'\1\2', text)
+
+    # 2. Fix broken sentences (Single newline -> Space)
+    # Lookbehind (?<!\n) and Lookahead (?!\n) ensure we only target SINGLE newlines.
+    # We keep double newlines (\n\n) because they usually indicate a new paragraph.
+    text = re.sub(r'(?<!\n)\n(?!\n)', ' ', text)
+
+    # 3. Collapse multiple spaces into one
+    text = re.sub(r'[ \t]+', ' ', text)
+
+    return text.strip()
+
 def extract_text_from_pdf(pdf_path):
     """
-    Extracts text from a PDF file.
-    
-    Parameters:
-    - pdf_path (str): Path to the PDF file.
-    
-    Returns:
-    - str: Extracted text from the PDF.
+    Extracts text from a PDF file using a Hybrid Strategy with formatting cleanup.
     """
     try:
         doc = fitz.open(pdf_path)
-        extracted_text = "\n".join([page.get_text("text") for page in doc])
+        full_text = []
+        
+        for i, page in enumerate(doc):
+            # Step 1: Standard Extraction
+            text = page.get_text("text")
+            
+            # Step 2: Check for sufficiency (scanned doc check)
+            if OCR_AVAILABLE and len(text.strip()) < 50:
+                try:
+                    # Step 3: Fallback to OCR
+                    images = convert_from_path(pdf_path, first_page=i+1, last_page=i+1)
+                    if images:
+                        ocr_text = pytesseract.image_to_string(images[0])
+                        
+                        # Use OCR text if it yielded better results
+                        if len(ocr_text.strip()) > len(text.strip()):
+                            text = ocr_text
+
+                except Exception as ocr_e:
+                    import sys
+                    sys.stderr.write(f"OCR Warning on page {i+1}: {ocr_e}\n")
+
+            # Step 4: Clean the text for this page
+            cleaned_page_text = clean_extracted_text(text)
+            full_text.append(cleaned_page_text)
+
         doc.close()
-        return extracted_text if extracted_text.strip() else "No text found in the PDF."
+        
+        # Join pages with double newlines to separate them clearly
+        combined_text = "\n\n".join(full_text)
+        
+        return combined_text if combined_text.strip() else "No text found in the PDF."
+
     except Exception as e:
         return f"Error extracting text: {e}"
    
@@ -297,7 +340,6 @@ def rotate_pdf(input_pdf_path, output_pdf_path, rotations):
     except Exception as e:
         return {"error": f"Error rotating PDF: {e}"}
 
-import fitz  # PyMuPDF
 
 def sign_pdf(input_pdf_path, output_pdf_path, signature_image_path, page_number, position, all_pages=False):
     """
@@ -341,7 +383,6 @@ def sign_pdf(input_pdf_path, output_pdf_path, signature_image_path, page_number,
 
 
 
-from PyPDF2 import PdfReader, PdfWriter
 
 def protect_pdf(input_path, output_path, password):
     try:

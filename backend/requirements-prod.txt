@@ -41,3 +41,7 @@ langchain
 langchain-community
 langchain-core
 langchain-google-genai
+
+pytesseract
+pdf2image
+Pillow
