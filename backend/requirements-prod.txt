@@ -1,51 +1,42 @@
-# --- Core Web Framework ---
+beautifulsoup4==4.14.2
+flask-mongoengine==1.0.0
+blinker==1.9.0
+certifi==2025.11.12
+charset-normalizer==3.4.4
+click==8.1.7  
+colorama==0.4.6
+deep-translator==1.11.4
+defusedxml==0.7.1
 Flask==3.1.2
 flask-cors==6.0.1
-flask-mongoengine==1.0.0
-Werkzeug==3.1.4
-click==8.1.7
-blinker==1.9.0
+fonttools==4.61.0
+fpdf2==2.8.5
+idna==3.11
 itsdangerous==2.2.0
 Jinja2==3.1.6
 MarkupSafe==3.0.3
-
-# --- PDF & Image Processing ---
-# PyMuPDF is the fastest PDF engine (replaces PyPDF2)
-PyMuPDF==1.26.6
-# For generating new PDFs (translation/redaction)
-fpdf2==2.8.5
-# For OCR (Optical Character Recognition)
-pdf2image
-pytesseract
 pillow==12.0.0
-fonttools==4.61.0
-
-# --- AI & Chat (Google Gemini) ---
-# We removed 'openai' and 'tiktoken'
+PyMuPDF==1.26.6
+PyPDF2==3.0.1
+requests==2.32.5
+soupsieve==2.8
+typing_extensions==4.15.0
+uharfbuzz==0.52.0
+urllib3==2.5.0
+Werkzeug==3.1.4
 langchain
 langchain-community
-langchain-core
-langchain-google-genai
-langchain-text-splitters
+openai
 faiss-cpu
-
-# --- Audio (TTS & STT) ---
-gTTS==2.5.1
-SpeechRecognition==3.10.3
-pydub==0.25.1
-
-# --- Smart Redaction (The Heaviest Part) ---
-# If build is still too slow, removing these breaks Redaction but speeds up deploy
+tiktoken
 spacy==3.7.2
 presidio-analyzer
 presidio-anonymizer
-
-# --- Utilities ---
-deep-translator==1.11.4
-requests==2.32.5
-urllib3==2.5.0
-certifi==2025.11.12
-idna==3.11
-charset-normalizer==3.4.4
-colorama==0.4.6
-defusedxml==0.7.1
+langchain-google-genai
+langchain-text-splitters
+gTTS==2.5.1
+SpeechRecognition==3.10.3
+pydub==0.25.1
+pytesseract
+pdf2image
+Pillow

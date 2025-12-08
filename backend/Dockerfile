@@ -3,8 +3,7 @@
 # 1. Use a Linux base image that has both Node and Python
 FROM node:18-slim
 
-# 2. Install Python, Tesseract OCR, and other necessary tools
-# Added: tesseract-ocr, tesseract-ocr-eng, poppler-utils
+# 2. Install Python and other necessary tools
 RUN apt-get update && apt-get install -y \
     python3 \
     python3-pip \
@@ -12,8 +11,8 @@ RUN apt-get update && apt-get install -y \
     ffmpeg \
     tesseract-ocr \
     tesseract-ocr-eng \
-    poppler-utils \
-    && rm -rf /var/lib/apt/lists/**
+    poppler-utils \    
+    && rm -rf /var/lib/apt/lists/*
 
 # 3. Create a virtual environment for Python (Recommended)
 ENV VIRTUAL_ENV=/opt/venv
