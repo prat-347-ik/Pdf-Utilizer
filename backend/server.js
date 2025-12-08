@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import morgan from 'morgan'; // 1. Import Morgan
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url'; 
@@ -33,11 +34,33 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+// 'dev' format gives you: Method, URL, Status Code, Response Time
+app.use(morgan('dev'));
 
-const allowedOrigins = [process.env.FRONTEND_URL, "http://localhost:5173"];
-app.use(cors({ origin: allowedOrigins }));
-app.use(helmet());
-app.use(express.json());
+// Replace "app.use(cors());" with this:
+const allowedOrigins = [
+  "http://localhost:5173",                  // Local Development
+  "https://pdf-utilizer.netlify.app"      // ⚠️ PASTE YOUR NETLIFY URL HERE
+]
+;
+app.use(cors({
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      // Optional: You can block it here, or just allow it for now
+      // For strict security, uncomment the line below:
+      // return callback(new Error('The CORS policy for this site does not allow access from the specified Origin.'), false);
+    }
+    return callback(null, true);
+  },
+  credentials: true
+}));
+// Replace "app.use(helmet());" with this:
+// This allows your Netlify frontend to load images/PDFs hosted in your '/uploads' folder
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));app.use(express.json());
 
 // --- ADD THIS LINE ---
 // This tells Express: "If a request starts with /uploads, look for the file in the local 'uploads' folder"
@@ -59,6 +82,7 @@ app.use('/redact', redactRoutes);
 app.use('/api/quiz', quizRoutes);
 // This creates the endpoint: GET http://localhost:5000/user
 app.use('/user', userRoutes);
+
 
 app.get('/', (req, res) => {
   res.send('PDF Utilizer Backend is Running!');

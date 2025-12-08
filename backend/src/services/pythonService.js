@@ -1,22 +1,38 @@
 import { spawn } from 'child_process';
 import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Define __dirname for ES Modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export const runPythonScript = (operation, payload) => {
   return new Promise((resolve, reject) => {
-    const scriptPath = path.resolve('services/pdf_processor.py'); 
+    // Correct path resolution
+    const scriptPath = path.join(__dirname, '../../services/pdf_processor.py'); 
     
-    // ✅ FIX: Removed the 'env' option. Let Python handle encoding internally.
-    const pythonProcess = spawn('python', [scriptPath, operation, JSON.stringify(payload)]);
+    // 🔍 DYNAMIC COMMAND SELECTION
+    // If we are on Windows ('win32'), use 'python'
+    // If we are on Linux/Mac/Render, use 'python3'
+    const pythonCommand = process.platform === 'win32' ? 'python' : 'python3';
+
+    const pythonProcess = spawn(pythonCommand, [scriptPath, operation, JSON.stringify(payload)]);
 
     let dataString = '';
     let errorString = '';
 
+// ✅ FIX 1: Stream stdout to console immediately
     pythonProcess.stdout.on('data', (data) => {
-      dataString += data.toString();
+      const output = data.toString();
+      console.log(`[Python Output]: ${output}`); // <--- Add this
+      dataString += output;
     });
 
+// ✅ FIX 2: Stream stderr (errors/logs) to console immediately
     pythonProcess.stderr.on('data', (data) => {
-      errorString += data.toString();
+      const errorOutput = data.toString();
+      console.error(`[Python Log]: ${errorOutput}`); // <--- Add this
+      errorString += errorOutput;
     });
 
     pythonProcess.on('close', (code) => {
@@ -31,7 +47,7 @@ export const runPythonScript = (operation, payload) => {
           reject(new Error(response.error || 'Unknown error from Python script'));
         }
       } catch (err) {
-        reject(new Error(`Failed to parse Python output: ${dataString}`));
+        reject(new Error(`Failed to parse Python output: ${dataString}. Error: ${errorString}`));
       }
     });
   });

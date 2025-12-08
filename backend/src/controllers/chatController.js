@@ -20,8 +20,8 @@ export const initChat = async (req, res) => {
         res.json({ success: true, sessionId: indexId });
 
     } catch (e) {
-        res.status(500).json({ error: e.message });
-    }
+        console.error("❌ InitChat Error:", e); // <--- Add this line
+        res.status(500).json({ error: e.message });    }
 };
 
 // 2. Ask Question
@@ -38,6 +38,6 @@ export const askChat = async (req, res) => {
         res.json({ success: true, answer: result.answer, context: result.context });
 
     } catch (e) {
-        res.status(500).json({ error: e.message });
-    }
+        console.error("❌ AskChat Error:", e); // <--- Add this line
+        res.status(500).json({ error: e.message });    }
 };
