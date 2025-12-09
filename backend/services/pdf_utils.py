@@ -3,8 +3,6 @@ import sys
 import io
 import fitz  # PyMuPDF
 import re  # <--- NEW: Added for text cleaning regex
-import concurrent.futures # NEW: For parallel processing
-
 from PyPDF2 import PdfReader, PdfWriter, PdfMerger
 from PIL import Image
 from fpdf import FPDF
@@ -245,58 +243,44 @@ def clean_extracted_text(text):
 
     return text.strip()
 
-
-def process_page_ocr(pdf_path, page_num):
-    """Helper function to process a single page for OCR"""
-    try:
-        # Lower DPI to 150 for speed (usually sufficient for text)
-        images = convert_from_path(pdf_path, first_page=page_num, last_page=page_num, dpi=150)
-        if images:
-            return pytesseract.image_to_string(images[0])
-    except Exception:
-        return ""
-    return ""
-
 def extract_text_from_pdf(pdf_path):
+    """
+    Extracts text from a PDF file using a Hybrid Strategy with formatting cleanup.
+    """
     try:
         doc = fitz.open(pdf_path)
-        full_text = [""] * len(doc) # Pre-allocate list to keep order
-        pages_to_ocr = []
-
-        # Step 1: Quick Extraction & Identify Scanned Pages
+        full_text = []
+        
         for i, page in enumerate(doc):
+            # Step 1: Standard Extraction
             text = page.get_text("text")
-            cleaned_text = clean_extracted_text(text)
             
-            # If text is good, store it. If bad, mark for OCR.
-            if OCR_AVAILABLE and len(cleaned_text) < 50:
-                pages_to_ocr.append(i) # Save index to process later
-            else:
-                full_text[i] = cleaned_text
+            # Step 2: Check for sufficiency (scanned doc check)
+            if OCR_AVAILABLE and len(text.strip()) < 50:
+                try:
+                    # Step 3: Fallback to OCR
+                    images = convert_from_path(pdf_path, first_page=i+1, last_page=i+1)
+                    if images:
+                        ocr_text = pytesseract.image_to_string(images[0])
+                        
+                        # Use OCR text if it yielded better results
+                        if len(ocr_text.strip()) > len(text.strip()):
+                            text = ocr_text
+
+                except Exception as ocr_e:
+                    import sys
+                    sys.stderr.write(f"OCR Warning on page {i+1}: {ocr_e}\n")
+
+            # Step 4: Clean the text for this page
+            cleaned_page_text = clean_extracted_text(text)
+            full_text.append(cleaned_page_text)
 
         doc.close()
-
-        # Step 2: Run OCR in Parallel (Only for bad pages)
-        if pages_to_ocr:
-            sys.stderr.write(f"Running OCR on {len(pages_to_ocr)} pages...\n")
-            with concurrent.futures.ThreadPoolExecutor() as executor:
-                # Submit all OCR tasks at once
-                future_to_page = {
-                    executor.submit(process_page_ocr, pdf_path, i + 1): i 
-                    for i in pages_to_ocr
-                }
-                
-                for future in concurrent.futures.as_completed(future_to_page):
-                    page_idx = future_to_page[future]
-                    try:
-                        ocr_result = future.result()
-                        # Only use OCR if it actually returned something meaningful
-                        if len(ocr_result.strip()) > 0:
-                            full_text[page_idx] = clean_extracted_text(ocr_result)
-                    except Exception as exc:
-                        print(f"Page {page_idx+1} generated an exception: {exc}")
-
-        return "\n\n".join(full_text) if any(full_text) else "No text found."
+        
+        # Join pages with double newlines to separate them clearly
+        combined_text = "\n\n".join(full_text)
+        
+        return combined_text if combined_text.strip() else "No text found in the PDF."
 
     except Exception as e:
         return f"Error extracting text: {e}"
