@@ -268,7 +268,6 @@ def extract_text_from_pdf(pdf_path):
                             text = ocr_text
 
                 except Exception as ocr_e:
-                    import sys
                     sys.stderr.write(f"OCR Warning on page {i+1}: {ocr_e}\n")
 
             # Step 4: Clean the text for this page

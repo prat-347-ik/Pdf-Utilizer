@@ -4,7 +4,7 @@ import ToolLayout from "../components/ToolLayout.jsx";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   FileText, UploadCloud, CheckCircle, AlertCircle, 
-  Copy, Download, X, ScanText, Clipboard
+  Copy, Download, X, ScanText, Clipboard, Loader2
 } from "lucide-react";
 
 const ExtractText = () => {
@@ -220,9 +220,44 @@ const ExtractText = () => {
             </div>
           </div>
 
-          {/* Editor Content */}
-          <div className="flex-1 relative">
-            {extractedData ? (
+          {/* Editor Content with Loading State */}
+          <div className="flex-1 relative group">
+            {loading ? (
+              // --- NEW: Loading State with Progress Bar ---
+              <div className="absolute inset-0 flex flex-col items-center justify-center z-10 p-8 text-center bg-white/50 dark:bg-black/20 backdrop-blur-sm">
+                
+                {/* Animated Spinner Icon */}
+                <motion.div 
+                  animate={{ rotate: 360 }}
+                  transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
+                  className="mb-6 p-4 bg-teal-50 dark:bg-white/5 rounded-full"
+                >
+                  <Loader2 className="w-8 h-8 text-teal-600 dark:text-teal-400" />
+                </motion.div>
+
+                {/* Progress Bar Container */}
+                <div className="w-full max-w-md h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden relative shadow-inner">
+                  {/* Animated Bar: Simulates progress over 30 seconds */}
+                  <motion.div
+                    className="absolute top-0 left-0 h-full bg-gradient-to-r from-teal-400 to-teal-600"
+                    initial={{ width: "0%" }}
+                    animate={{ width: "95%" }}
+                    transition={{ duration: 30, ease: "easeOut" }} 
+                  />
+                </div>
+
+                {/* Text Hints */}
+                <h3 className="mt-8 text-xl font-bold text-gray-800 dark:text-white animate-pulse">
+                  Extracting Text...
+                </h3>
+                <p className="mt-3 text-sm text-gray-500 dark:text-gray-400 max-w-xs leading-relaxed">
+                  We are processing your document. <br/>
+                  <span className="opacity-75 text-xs">
+                    (This may take up to a minute on the Free Tier server)
+                  </span>
+                </p>
+              </div>
+            ) : extractedData ? (
               <textarea
                 className="w-full h-full p-6 bg-transparent text-gray-800 dark:text-gray-200 font-mono text-sm resize-none outline-none custom-scrollbar leading-relaxed"
                 value={extractedData}
