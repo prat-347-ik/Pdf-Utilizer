@@ -2,7 +2,7 @@
 
 ![Node.js](https://img.shields.io/badge/Node.js-v18%2B-43853D?style=flat&logo=node.js&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-v3.10%2B-3776AB?style=flat&logo=python&logoColor=white)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-v14%2B-336791?style=flat&logo=postgresql&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-v6.0-47A248?style=flat&logo=MongoDB&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Build Status](https://img.shields.io/badge/Status-Active_Development-brightgreen)
 
